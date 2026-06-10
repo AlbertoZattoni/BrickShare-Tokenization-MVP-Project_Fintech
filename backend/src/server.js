@@ -1,2 +1,113 @@
-// TODO: Create the Express server and mount BrickShare MVP API routes.
+// Dependency-free HTTP API server for the BrickShare MVP backend.
 
+const http = require("http");
+const { URL } = require("url");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+const orderRoutes = require("./routes/orderRoutes");
+const rentalRoutes = require("./routes/rentalRoutes");
+
+const PORT = process.env.PORT || 4000;
+
+function sendJson(res, statusCode, body) {
+  res.writeHead(statusCode, {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  });
+  res.end(JSON.stringify(body));
+}
+
+function readJsonBody(req) {
+  return new Promise((resolve, reject) => {
+    let rawBody = "";
+
+    req.on("data", (chunk) => {
+      rawBody += chunk;
+    });
+
+    req.on("end", () => {
+      if (!rawBody) {
+        resolve({});
+        return;
+      }
+
+      try {
+        resolve(JSON.parse(rawBody));
+      } catch (error) {
+        reject(new Error("Request body must be valid JSON."));
+      }
+    });
+  });
+}
+
+async function handleRequest(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    res.writeHead(204);
+    res.end();
+    return;
+  }
+
+  const { pathname } = new URL(req.url, `http://${req.headers.host}`);
+
+  try {
+    if (req.method === "GET" && pathname === "/api/health") {
+      sendJson(res, 200, { status: "ok", service: "brickshare-backend" });
+      return;
+    }
+
+    if (req.method === "GET" && pathname === "/api/dashboard") {
+      const result = dashboardRoutes.getDashboard();
+      sendJson(res, result.statusCode, result.body);
+      return;
+    }
+
+    if (req.method === "POST" && pathname === "/api/reset") {
+      const result = dashboardRoutes.resetDashboard();
+      sendJson(res, result.statusCode, result.body);
+      return;
+    }
+
+    if (req.method === "POST" && pathname === "/api/orders") {
+      const result = orderRoutes.createOrder(await readJsonBody(req));
+      sendJson(res, result.statusCode, result.body);
+      return;
+    }
+
+    if (req.method === "POST" && pathname === "/api/rent/distribute") {
+      const result = rentalRoutes.distributeRent(await readJsonBody(req));
+      sendJson(res, result.statusCode, result.body);
+      return;
+    }
+
+    if (req.method === "POST" && pathname === "/api/rent/claim") {
+      const result = rentalRoutes.claimRent(await readJsonBody(req));
+      sendJson(res, result.statusCode, result.body);
+      return;
+    }
+
+    sendJson(res, 404, {
+      success: false,
+      reason: "API route not found.",
+    });
+  } catch (error) {
+    sendJson(res, 400, {
+      success: false,
+      reason: error.message,
+    });
+  }
+}
+
+const server = http.createServer(handleRequest);
+
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`BrickShare backend running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = server;
