@@ -1,0 +1,10 @@
+{
+  "name": "brickshare-mvp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TODO: Root workspace for the BrickShare MVP frontend, backend, docs, and tests.",
+  "scripts": {
+    "test": "echo \"TODO: Add root test command after Milestone 10\""
+  }
+}
+

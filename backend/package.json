@@ -1,0 +1,10 @@
+{
+  "name": "brickshare-mvp-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "TODO: Express backend for BrickShare matching, token transfer simulation, and rent distribution.",
+  "scripts": {
+    "dev": "echo \"TODO: Add backend dev command when dependencies are introduced\""
+  }
+}
+
