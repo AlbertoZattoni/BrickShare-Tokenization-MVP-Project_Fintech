@@ -8,6 +8,22 @@ function createId(prefix) {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
 }
 
+function formatMoney(value) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function getUserName(userId) {
+  return store.getUserById(userId)?.name || userId;
+}
+
+function getPropertyName(propertyId) {
+  return store.getPropertyById(propertyId)?.name || "the property";
+}
+
 function getOppositeOrderType(type) {
   if (type === "buy") {
     return "sell";
@@ -43,6 +59,25 @@ function validateOrderInput({ userId, propertyId, type, quantity, limitPrice }) 
 
   if (!Number.isFinite(limitPrice) || limitPrice <= 0) {
     return { valid: false, reason: "Limit price must be greater than zero." };
+  }
+
+  if (type === "buy" && user.cashBalance < quantity * limitPrice) {
+    return {
+      valid: false,
+      reason:
+        "Buyer does not have enough cash for this order at the selected limit price.",
+    };
+  }
+
+  if (type === "sell") {
+    const holding = store.getHolding(userId, propertyId);
+
+    if (!holding || holding.tokenBalance < quantity) {
+      return {
+        valid: false,
+        reason: "Seller does not have enough tokens for this sell order.",
+      };
+    }
   }
 
   return { valid: true };
@@ -108,7 +143,7 @@ function placeOrder(orderInput) {
     return {
       success: false,
       status: "rejected",
-      reason: validation.reason,
+      reason: `Order rejected: ${validation.reason}`,
     };
   }
 
@@ -131,7 +166,8 @@ function placeOrder(orderInput) {
     return {
       success: true,
       status: "open",
-      message: "Order submitted. No exact match found yet.",
+      message:
+        "Order submitted. No exact match found yet, so it remains open in the order book.",
       order: newOrder,
     };
   }
@@ -154,7 +190,7 @@ function placeOrder(orderInput) {
     return {
       success: false,
       status: "rejected",
-      reason: transferResult.reason,
+      reason: `Order rejected: ${transferResult.reason}`,
       order: newOrder,
     };
   }
@@ -167,7 +203,13 @@ function placeOrder(orderInput) {
   return {
     success: true,
     status: "matched",
-    message: "Trade matched and settled.",
+    message: `Trade matched: ${getUserName(settlement.buyerId)} bought ${
+      settlement.quantity
+    } ${getPropertyName(settlement.propertyId)} tokens from ${getUserName(
+      settlement.sellerId
+    )} at ${formatMoney(
+      settlement.executionPrice
+    )} each. Ownership and cash balances were updated automatically.`,
     order: newOrder,
     matchedOrder,
     trade,

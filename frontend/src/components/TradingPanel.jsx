@@ -21,6 +21,7 @@ export default function TradingPanel({ user, property }) {
         <p class="eyebrow">Secondary market</p>
         <h2>Place order</h2>
       </div>
+      <p class="muted">Version one matches only exact quantities. Alice can match Bob's seeded 10-token sell order.</p>
       <form class="trade-form" data-order-form>
         <input type="hidden" name="propertyId" value="${property.id}" />
         <label>

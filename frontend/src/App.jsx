@@ -17,18 +17,21 @@ export default function App(root) {
     data: null,
     selectedUserId: DEFAULT_USER_ID,
     notice: "Loading BrickShare demo data...",
+    noticeType: "info",
     error: "",
   };
 
   async function loadDashboard(nextNotice = "") {
     state.loading = true;
     state.error = "";
+    state.noticeType = "info";
     render();
 
     try {
       const response = await getDashboard();
       state.data = response.data;
       state.notice = nextNotice || "Dashboard ready.";
+      state.noticeType = nextNotice ? "success" : "info";
 
       if (!state.data.users.some((user) => user.id === state.selectedUserId)) {
         state.selectedUserId = DEFAULT_USER_ID;
@@ -42,9 +45,10 @@ export default function App(root) {
     }
   }
 
-  async function runAction(action, successMessage) {
+  async function runAction(action, progressMessage, successMessage) {
     state.error = "";
-    state.notice = "Processing...";
+    state.notice = progressMessage;
+    state.noticeType = "info";
     render();
 
     try {
@@ -61,32 +65,56 @@ export default function App(root) {
   const actions = {
     selectUser(userId) {
       state.selectedUserId = userId;
+      const user = state.data.users.find((item) => item.id === userId);
+      state.notice = `${user.name} selected. You are now viewing the ${user.role} demo perspective.`;
+      state.noticeType = "info";
       render();
     },
     submitOrder(order) {
+      if (!Number.isInteger(order.quantity) || order.quantity <= 0) {
+        state.error = "Order rejected: quantity must be a positive whole number.";
+        state.notice = "";
+        render();
+        return;
+      }
+
+      if (!Number.isFinite(order.limitPrice) || order.limitPrice <= 0) {
+        state.error = "Order rejected: limit price must be greater than zero.";
+        state.notice = "";
+        render();
+        return;
+      }
+
       runAction(
         () =>
           placeOrder({
             ...order,
             userId: state.selectedUserId,
           }),
+        "Submitting order to the matching engine...",
         "Order submitted."
       );
     },
     distributeRent(propertyId) {
       runAction(
         () => distributeRentalIncome(propertyId),
+        "Admin is distributing rental income to current token holders...",
         "Rental income distributed."
       );
     },
     claimRent() {
       runAction(
         () => claimRentalIncome(state.selectedUserId),
+        "Claiming rental income into the selected user's cash balance...",
         "Rental income claimed."
       );
     },
     reset() {
-      runAction(() => resetDemo(), "Demo reset.");
+      runAction(
+        () => resetDemo(),
+        "Resetting the demo to the original Alice, Bob, and Admin scenario...",
+        "Demo reset."
+      );
     },
   };
 

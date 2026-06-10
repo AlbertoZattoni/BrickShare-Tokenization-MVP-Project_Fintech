@@ -66,10 +66,16 @@ export default function Dashboard({ state }) {
 
       ${
         state.notice
-          ? `<p class="status">${state.notice}</p>`
+          ? `<p class="status ${state.noticeType || "info"}" aria-live="polite">${
+              state.notice
+            }</p>`
           : ""
       }
-      ${state.error ? `<p class="status error">${state.error}</p>` : ""}
+      ${
+        state.error
+          ? `<p class="status error" aria-live="assertive">${state.error}</p>`
+          : ""
+      }
 
       <section class="dashboard-grid">
         ${PortfolioSummary({ user: selectedUser, property, holdings })}

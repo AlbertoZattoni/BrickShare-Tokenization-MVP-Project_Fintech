@@ -140,6 +140,17 @@ button:disabled {
   color: #304255;
 }
 
+.status.info {
+  border-color: #b8c8d8;
+  background: #f7fbff;
+}
+
+.status.success {
+  border-color: #b8d8cf;
+  background: #edf8f5;
+  color: #146c5d;
+}
+
 .status.error {
   border-color: #f0b8b1;
   background: #fff1ef;

@@ -11,6 +11,14 @@ function roundMoney(value) {
   return Math.round(value * 100) / 100;
 }
 
+function formatMoney(value) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
 function distributeRentalIncome({ propertyId, rentAmount }) {
   const property = store.getPropertyById(propertyId);
 
@@ -83,7 +91,11 @@ function distributeRentalIncome({ propertyId, rentAmount }) {
 
   return {
     success: true,
-    message: "Rental income distributed to current token holders.",
+    message: `Rental income distributed: ${formatMoney(
+      distribution.rentAmount
+    )} was allocated to ${payouts.length} current token holder${
+      payouts.length === 1 ? "" : "s"
+    }.`,
     distribution,
   };
 }
@@ -112,7 +124,9 @@ function claimRentalIncome({ userId }) {
 
   return {
     success: true,
-    message: "Rental income claimed into cash balance.",
+    message: `Rental income claimed: ${formatMoney(
+      claimAmount
+    )} was moved into ${user.name}'s cash balance.`,
     userId,
     claimAmount,
     cashBalance: user.cashBalance,

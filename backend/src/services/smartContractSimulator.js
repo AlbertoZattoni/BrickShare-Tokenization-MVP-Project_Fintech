@@ -9,6 +9,14 @@ function roundMoney(value) {
   return Math.round(value * 100) / 100;
 }
 
+function formatMoney(value) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
 function validateTransfer({ propertyId, sellerId, buyerId, quantity, price }) {
   const property = store.getPropertyById(propertyId);
   const seller = store.getUserById(sellerId);
@@ -106,6 +114,9 @@ function transferTokens({ propertyId, sellerId, buyerId, quantity, price }) {
 
   return {
     success: true,
+    message: `Tokens transferred automatically: ${quantity} tokens moved from seller to buyer and ${formatMoney(
+      sellerProceeds
+    )} was paid to the seller after BrickShare's 0.5% fee.`,
     propertyId,
     sellerId,
     buyerId,

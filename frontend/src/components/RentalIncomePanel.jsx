@@ -30,6 +30,8 @@ export default function RentalIncomePanel({ user, property, rentalDistributions 
             ? `Latest distribution: ${formatMoney(
                 latestDistribution.rentAmount
               )} across ${latestDistribution.payouts.length} holders.`
+            : user.role === "admin"
+            ? "Use the Admin view to distribute this month's rent to current token holders."
             : "No rental income has been distributed yet."
         }
       </p>
