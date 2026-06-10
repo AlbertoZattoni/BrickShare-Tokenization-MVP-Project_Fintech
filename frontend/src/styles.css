@@ -1,2 +1,266 @@
-/* TODO: Add dashboard layout and component styling for the MVP GUI. */
+* {
+  box-sizing: border-box;
+}
 
+body {
+  margin: 0;
+  background: #f4f6f8;
+  color: #18212f;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.app-shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 28px 0 40px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.topbar h1,
+.panel h2,
+.panel h3 {
+  margin: 0;
+}
+
+.topbar h1 {
+  font-size: 32px;
+  line-height: 1.1;
+}
+
+.eyebrow,
+.label {
+  margin: 0 0 4px;
+  color: #607082;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.property-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  overflow: hidden;
+  margin-bottom: 18px;
+  border: 1px solid #dfe5eb;
+  border-radius: 8px;
+  background: #dfe5eb;
+}
+
+.property-strip div {
+  min-height: 80px;
+  padding: 16px;
+  background: #ffffff;
+}
+
+.property-strip strong {
+  display: block;
+  font-size: 18px;
+}
+
+.user-switcher {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.user-switcher button,
+.ghost-button,
+.primary-button {
+  border: 1px solid #cbd5df;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #18212f;
+}
+
+.user-switcher button {
+  min-height: 58px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.user-switcher button span {
+  display: block;
+  margin-top: 2px;
+  color: #607082;
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+.user-switcher button.active {
+  border-color: #146c5d;
+  background: #e9f5f2;
+}
+
+.ghost-button {
+  min-height: 40px;
+  padding: 0 14px;
+}
+
+.primary-button {
+  min-height: 42px;
+  padding: 0 14px;
+  border-color: #146c5d;
+  background: #146c5d;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.status {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid #cbd5df;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #304255;
+}
+
+.status.error {
+  border-color: #f0b8b1;
+  background: #fff1ef;
+  color: #9d2c1f;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.panel {
+  min-height: 260px;
+  padding: 18px;
+  border: 1px solid #dfe5eb;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.panel.wide {
+  grid-column: 1 / -1;
+}
+
+.panel-header {
+  margin-bottom: 16px;
+}
+
+.metric-row,
+.table-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 42px;
+  border-top: 1px solid #eef2f5;
+}
+
+.metric-row.highlight {
+  margin-top: 8px;
+  padding: 10px 0 0;
+  color: #146c5d;
+}
+
+.muted {
+  color: #607082;
+  line-height: 1.5;
+}
+
+.trade-form {
+  display: grid;
+  gap: 12px;
+}
+
+.trade-form label {
+  display: grid;
+  gap: 6px;
+  color: #607082;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.trade-form input,
+.trade-form select {
+  min-height: 42px;
+  width: 100%;
+  border: 1px solid #cbd5df;
+  border-radius: 8px;
+  padding: 0 12px;
+  color: #18212f;
+  background: #ffffff;
+}
+
+.market-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.table {
+  border-bottom: 1px solid #eef2f5;
+}
+
+.table-row {
+  font-size: 14px;
+}
+
+.pill {
+  min-width: 52px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.pill.buy {
+  background: #e9f5f2;
+  color: #146c5d;
+}
+
+.pill.sell {
+  background: #fff3d6;
+  color: #7a5500;
+}
+
+@media (max-width: 820px) {
+  .topbar,
+  .market-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .property-strip,
+  .dashboard-grid,
+  .user-switcher {
+    grid-template-columns: 1fr;
+  }
+}

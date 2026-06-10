@@ -7,6 +7,7 @@ const orderRoutes = require("./routes/orderRoutes");
 const rentalRoutes = require("./routes/rentalRoutes");
 
 const PORT = process.env.PORT || 4000;
+const HOST = process.env.HOST || "127.0.0.1";
 
 function sendJson(res, statusCode, body) {
   res.writeHead(statusCode, {
@@ -105,7 +106,7 @@ async function handleRequest(req, res) {
 const server = http.createServer(handleRequest);
 
 if (require.main === module) {
-  server.listen(PORT, () => {
+  server.listen(PORT, HOST, () => {
     console.log(`BrickShare backend running on http://localhost:${PORT}`);
   });
 }

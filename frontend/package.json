@@ -2,9 +2,9 @@
   "name": "brickshare-mvp-frontend",
   "version": "0.1.0",
   "private": true,
-  "description": "TODO: React frontend for the single-page BrickShare dashboard.",
+  "description": "Dependency-free single-page dashboard for the BrickShare MVP.",
   "scripts": {
-    "dev": "echo \"TODO: Add Vite dev command when frontend dependencies are introduced\""
+    "dev": "node server.js",
+    "start": "node server.js"
   }
 }
-
