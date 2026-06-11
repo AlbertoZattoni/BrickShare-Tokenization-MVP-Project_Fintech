@@ -80,11 +80,10 @@ Version-one matching rule:
 ```text
 same property
 opposite order type
-same exact quantity
 buy price >= sell price
 ```
 
-Partial fills are intentionally excluded. This keeps the MVP easy to explain in a 10-minute investor demo.
+If quantities differ, the smaller quantity is executed and the remaining quantity stays open. This keeps partial matching visible while still being easy to explain in a 10-minute investor demo.
 
 When a match is found, the matching engine calls the smart contract simulator. It does not directly update token ownership itself.
 
@@ -96,7 +95,7 @@ File:
 backend/src/services/smartContractSimulator.js
 ```
 
-This layer represents the ownership registry. It simulates what a smart contract would do after a valid match:
+This layer represents the smart-contract-style ownership logic. It simulates what a contract would do after a valid match:
 
 - validate seller token balance
 - validate buyer cash balance
@@ -162,7 +161,7 @@ The store is in-memory only. It is reset with `POST /api/reset` or when the back
 Implemented:
 
 - fractional property tokens
-- ownership registry simulation
+- smart-contract-style ownership balance simulation
 - secondary market matching
 - automatic token transfer
 - rental income distribution
@@ -175,7 +174,6 @@ Not implemented:
 - legal KYC/AML workflow
 - real payments
 - full order book mechanics
-- partial fills
 - production database
 
 ## Technical Risks and Scaling Needs

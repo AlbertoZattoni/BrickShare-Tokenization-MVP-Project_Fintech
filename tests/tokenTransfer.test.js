@@ -24,9 +24,6 @@ test("smart contract simulator transfers tokens and cash with BrickShare fee", (
   assert.equal(store.getState().platformRevenue.issuanceFees, 2000);
   assert.equal(store.getState().platformRevenue.tradingCommissions, 5);
   assert.equal(store.getState().platformRevenue.managementFees, 1000);
-  assert.equal(store.getOwnershipLedger().length, 2);
-  assert.equal(store.getOwnershipLedger()[1].blockNumber, 2);
-  assert.match(store.getOwnershipLedger()[1].blockHash, /^0x[a-f0-9]{12}$/);
   assert.equal(store.getUserById(ids.ALICE_ID).cashBalance, 11000);
   assert.equal(store.getUserById(ids.BOB_ID).cashBalance, 3495);
   assert.equal(store.getHolding(ids.ALICE_ID, ids.PROPERTY_ID).tokenBalance, 10);

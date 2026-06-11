@@ -11,10 +11,6 @@ function roundMoney(value) {
   return Math.round(value * 100) / 100;
 }
 
-function createId(prefix) {
-  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
-}
-
 function formatMoney(value) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -91,7 +87,6 @@ function transferTokens({
   buyerId,
   quantity,
   price,
-  referenceId,
 }) {
   const validation = validateTransfer({
     propertyId,
@@ -126,17 +121,6 @@ function transferTokens({
 
   buyerHolding.averagePurchasePrice = price;
 
-  const ledgerEntry = store.addOwnershipLedgerEntry({
-    id: createId("ledger"),
-    propertyId,
-    fromUserId: sellerId,
-    toUserId: buyerId,
-    quantity,
-    reason: "Matched trade token transfer",
-    referenceId,
-    createdAt: new Date().toISOString(),
-  });
-
   return {
     success: true,
     message: `Tokens transferred automatically: ${quantity} tokens moved from seller to buyer and ${formatMoney(
@@ -155,7 +139,6 @@ function transferTokens({
     sellerCashBalance: seller.cashBalance,
     buyerTokenBalance: buyerHolding.tokenBalance,
     sellerTokenBalance: sellerHolding.tokenBalance,
-    ledgerEntry,
   };
 }
 

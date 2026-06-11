@@ -1,7 +1,6 @@
 // In-memory demo store for the BrickShare MVP.
 // This keeps the app easy to reset during a live demo and avoids database setup.
 
-const crypto = require("crypto");
 const { seedData } = require("./seedData");
 
 let state = clone(seedData);
@@ -104,23 +103,6 @@ function addTrade(trade) {
   return trade;
 }
 
-function getOwnershipLedger() {
-  return state.ownershipLedger;
-}
-
-function addOwnershipLedgerEntry(entry) {
-  const previousEntry = state.ownershipLedger[state.ownershipLedger.length - 1];
-  const nextEntry = {
-    blockNumber: state.ownershipLedger.length + 1,
-    previousHash: previousEntry?.blockHash || "genesis",
-    ...entry,
-  };
-
-  nextEntry.blockHash = createLedgerHash(nextEntry);
-  state.ownershipLedger.push(nextEntry);
-  return nextEntry;
-}
-
 function addPlatformRevenue(revenueType, amount) {
   if (typeof state.platformRevenue === "number") {
     state.platformRevenue = {
@@ -134,26 +116,6 @@ function addPlatformRevenue(revenueType, amount) {
     Math.round(((state.platformRevenue[revenueType] || 0) + amount) * 100) /
     100;
   return state.platformRevenue;
-}
-
-function createLedgerHash(entry) {
-  const hashPayload = JSON.stringify({
-    blockNumber: entry.blockNumber,
-    previousHash: entry.previousHash,
-    propertyId: entry.propertyId,
-    fromUserId: entry.fromUserId,
-    toUserId: entry.toUserId,
-    quantity: entry.quantity,
-    reason: entry.reason,
-    referenceId: entry.referenceId,
-    createdAt: entry.createdAt,
-  });
-
-  return `0x${crypto
-    .createHash("sha256")
-    .update(hashPayload)
-    .digest("hex")
-    .slice(0, 12)}`;
 }
 
 function getRentalDistributions() {
@@ -182,8 +144,6 @@ module.exports = {
   updateOrder,
   getTrades,
   addTrade,
-  getOwnershipLedger,
-  addOwnershipLedgerEntry,
   addPlatformRevenue,
   getRentalDistributions,
   addRentalDistribution,

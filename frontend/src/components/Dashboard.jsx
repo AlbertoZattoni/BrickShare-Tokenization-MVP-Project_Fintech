@@ -1,7 +1,6 @@
 // Main one-page dashboard layout and user switcher.
 
 import OrderBook from "./OrderBook.jsx";
-import OwnershipLedger from "./OwnershipLedger.jsx";
 import PortfolioSummary from "./PortfolioSummary.jsx";
 import RentalIncomePanel from "./RentalIncomePanel.jsx";
 import TradingPanel from "./TradingPanel.jsx";
@@ -22,7 +21,6 @@ export default function Dashboard({ state }) {
     orders,
     trades,
     rentalDistributions,
-    ownershipLedger = [],
     platformRevenue = 0,
   } = state.data;
   const selectedUser = users.find((user) => user.id === state.selectedUserId);
@@ -98,7 +96,6 @@ export default function Dashboard({ state }) {
           holdings,
           rentalDistributions,
         })}
-        ${OwnershipLedger({ users, ledger: ownershipLedger })}
       </section>
     </main>
   `;

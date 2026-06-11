@@ -11,7 +11,6 @@ The first MVP uses one demo property: **Rotterdam Student Apartments**. Alice ac
 - Place buy and sell orders with partial matching.
 - Match Alice's buy order against Bob's seeded sell order, leaving any unfilled quantity open.
 - Simulate smart-contract-style token ownership transfer.
-- Show the simulated blockchain ownership registry with initial allocation, transfer blocks, and demo block hashes.
 - Track BrickShare revenue streams: issuance fee, trading commission, and commission / management fee.
 - Distribute rental income to current token holders.
 - Claim rental income into a user's cash balance.
@@ -31,7 +30,7 @@ Backend API and Matching Engine
 Smart Contract Simulation and In-Memory Store
 ```
 
-The frontend gives users a clear investment dashboard. The backend receives actions, validates orders, partially matches compatible buy and sell orders, and calls the simulated smart contract layer. The smart contract simulator updates token ownership, cash balances, BrickShare fee revenue, and the ownership ledger.
+The frontend gives users a clear investment dashboard. The backend receives actions, validates orders, partially matches compatible buy and sell orders, and calls the simulated smart contract layer. The smart contract simulator updates token ownership, cash balances, and BrickShare fee revenue.
 
 More detail is available in [docs/architecture.md](docs/architecture.md).
 
@@ -95,7 +94,6 @@ The tests cover:
 - exact and partial order matching
 - token and cash transfer
 - BrickShare fee revenue
-- ownership ledger entries
 - proportional rental income distribution
 
 ## BrickShare Fee Model
@@ -118,12 +116,11 @@ These are simulated platform revenue entries only. The MVP does not process real
 4. Select Alice.
 5. Alice buys 12 tokens at 100.
 6. The matching engine fills Bob's seeded 10-token sell order and leaves 2 tokens open.
-7. The smart contract simulator transfers tokens, cash, trading commission revenue, and a ledger block.
-8. Show the ownership ledger as the simulated blockchain registry.
-9. Select Admin and show the three BrickShare revenue streams.
-10. Distribute rental income.
-11. Select Alice and claim rental income.
-12. Reset the demo if needed.
+7. The smart contract simulator transfers tokens, cash, and trading commission revenue.
+8. Select Admin and show the three BrickShare revenue streams.
+9. Distribute rental income.
+10. Select Alice and claim rental income.
+11. Reset the demo if needed.
 
 More detail is available in [docs/demo-script.md](docs/demo-script.md).
 

@@ -20,7 +20,9 @@ Result:
 Covered features:
 
 - exact-quantity matching
+- partial order matching
 - token and cash transfer
+- BrickShare fee revenue
 - rental income distribution and claim
 
 ## Local Demo Servers

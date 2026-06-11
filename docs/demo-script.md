@@ -95,22 +95,22 @@ Point to the visible result:
 - Bob now owns 90 tokens
 - a trade appears in recent trades
 
-## 6. Show No-Match Behavior
+## 6. Show Partial Matching
 
 Optional demo:
 
-Reset the demo and let Alice buy 7 tokens instead of 10.
+Reset the demo and let Alice buy 12 tokens instead of 10.
 
 Expected result:
 
 ```text
-Order submitted. No exact match found yet, so it remains open in the order book.
+The matching engine fills Bob's 10-token sell order and leaves Alice's remaining 2 tokens open.
 ```
 
 Explain:
 
 ```text
-Version one uses exact-quantity matching only. This keeps the MVP simple while still proving the secondary-market logic.
+The engine executes the smaller side of the order. This keeps the secondary market realistic without making the demo complex.
 ```
 
 ## 7. Show Rental Income Distribution

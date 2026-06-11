@@ -1,4 +1,4 @@
-// Order route handler for the BrickShare exact-quantity matching engine.
+// Order route handler for the BrickShare matching engine.
 
 const matchingEngine = require("../services/matchingEngine");
 

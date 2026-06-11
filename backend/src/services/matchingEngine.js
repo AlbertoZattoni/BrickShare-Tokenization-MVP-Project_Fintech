@@ -189,7 +189,6 @@ function placeOrder(orderInput) {
       buyerId: settlement.buyerId,
       quantity: settlement.quantity,
       price: settlement.executionPrice,
-      referenceId: tradeId,
     });
 
     if (!transferResult.success) {

@@ -88,21 +88,6 @@ const seedData = {
 
   trades: [],
 
-  ownershipLedger: [
-    {
-      id: "ledger-initial-bob",
-      blockNumber: 1,
-      propertyId: PROPERTY_ID,
-      fromUserId: "issuer",
-      toUserId: BOB_ID,
-      quantity: 100,
-      reason: "Initial token allocation",
-      previousHash: "genesis",
-      blockHash: "0xinitial100",
-      createdAt: "2026-06-10T15:45:00.000Z",
-    },
-  ],
-
   platformRevenue: {
     issuanceFees: PROPERTY_TOTAL_VALUE * ISSUANCE_FEE_RATE,
     tradingCommissions: 0,
