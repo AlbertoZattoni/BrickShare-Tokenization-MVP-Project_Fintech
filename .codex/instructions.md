@@ -26,7 +26,12 @@ The first version uses:
 - Alice as buyer
 - Bob as seller
 - Admin as demo controller
-- exact-quantity matching only
+- partial order matching with remaining quantity kept open
+- simulated BrickShare revenue streams:
+  - 2.0% issuance fee
+  - 0.5% trading commission
+  - 1.0% annual commission / management fee
+- simulated blockchain ownership registry with initial allocation, transfer blocks, and demo block hashes
 - in-memory storage
 - backend smart contract simulation
 
@@ -47,6 +52,8 @@ Tests should stay focused on the three core features:
 
 - matching engine
 - token transfer
+- BrickShare fee revenue
+- ownership ledger
 - rental income distribution
 
 Use Node's built-in test runner:
@@ -63,11 +70,14 @@ Prefer:
 
 - Buy tokens
 - Sell tokens
+- Partial fill
+- Trading commission
+- Ownership registry
 - Claim rental income
 - Distribute rent
 - Trade matched
 
-Avoid unnecessary blockchain jargon in the UI.
+Use blockchain language only where it helps the demo, especially for the simulated ownership registry. Do not imply that real blockchain settlement, real custody, or real payments are implemented.
 
 ## Documentation Guidelines
 

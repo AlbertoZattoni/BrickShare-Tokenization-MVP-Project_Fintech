@@ -64,7 +64,9 @@ function renderTrades(users, trades) {
               )}</span>
               <span>${trade.quantity} tokens</span>
               <strong>${formatMoney(trade.executionPrice)}</strong>
-              <span>Fee ${formatMoney(trade.platformFee)}</span>
+              <span>Commission ${formatMoney(
+                trade.tradingCommission || trade.platformFee || 0
+              )}</span>
             </div>
           `
         )

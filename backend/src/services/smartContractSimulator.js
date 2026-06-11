@@ -3,7 +3,9 @@
 
 const store = require("../data/store");
 
-const TRADING_FEE_RATE = 0.005;
+const ISSUANCE_FEE_RATE = 0.02;
+const TRADING_COMMISSION_RATE = 0.005;
+const MANAGEMENT_FEE_RATE = 0.01;
 
 function roundMoney(value) {
   return Math.round(value * 100) / 100;
@@ -112,12 +114,12 @@ function transferTokens({
   const sellerHolding = store.getHolding(sellerId, propertyId);
 
   const tradeValue = roundMoney(quantity * price);
-  const platformFee = roundMoney(tradeValue * TRADING_FEE_RATE);
-  const sellerProceeds = roundMoney(tradeValue - platformFee);
+  const tradingCommission = roundMoney(tradeValue * TRADING_COMMISSION_RATE);
+  const sellerProceeds = roundMoney(tradeValue - tradingCommission);
 
   buyer.cashBalance = roundMoney(buyer.cashBalance - tradeValue);
   seller.cashBalance = roundMoney(seller.cashBalance + sellerProceeds);
-  store.addPlatformRevenue(platformFee);
+  store.addPlatformRevenue("tradingCommissions", tradingCommission);
 
   sellerHolding.tokenBalance -= quantity;
   buyerHolding.tokenBalance += quantity;
@@ -139,14 +141,15 @@ function transferTokens({
     success: true,
     message: `Tokens transferred automatically: ${quantity} tokens moved from seller to buyer and ${formatMoney(
       sellerProceeds
-    )} was paid to the seller after BrickShare's 0.5% fee.`,
+    )} was paid to the seller after BrickShare's 0.5% trading commission.`,
     propertyId,
     sellerId,
     buyerId,
     quantity,
     price,
     tradeValue,
-    platformFee,
+    platformFee: tradingCommission,
+    tradingCommission,
     sellerProceeds,
     buyerCashBalance: buyer.cashBalance,
     sellerCashBalance: seller.cashBalance,
@@ -157,7 +160,9 @@ function transferTokens({
 }
 
 module.exports = {
-  TRADING_FEE_RATE,
+  ISSUANCE_FEE_RATE,
+  TRADING_COMMISSION_RATE,
+  MANAGEMENT_FEE_RATE,
   validateTransfer,
   transferTokens,
 };

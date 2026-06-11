@@ -1,6 +1,7 @@
 // In-memory demo store for the BrickShare MVP.
 // This keeps the app easy to reset during a live demo and avoids database setup.
 
+const crypto = require("crypto");
 const { seedData } = require("./seedData");
 
 let state = clone(seedData);
@@ -108,14 +109,51 @@ function getOwnershipLedger() {
 }
 
 function addOwnershipLedgerEntry(entry) {
-  state.ownershipLedger.push(entry);
-  return entry;
+  const previousEntry = state.ownershipLedger[state.ownershipLedger.length - 1];
+  const nextEntry = {
+    blockNumber: state.ownershipLedger.length + 1,
+    previousHash: previousEntry?.blockHash || "genesis",
+    ...entry,
+  };
+
+  nextEntry.blockHash = createLedgerHash(nextEntry);
+  state.ownershipLedger.push(nextEntry);
+  return nextEntry;
 }
 
-function addPlatformRevenue(amount) {
-  state.platformRevenue =
-    Math.round((state.platformRevenue + amount) * 100) / 100;
+function addPlatformRevenue(revenueType, amount) {
+  if (typeof state.platformRevenue === "number") {
+    state.platformRevenue = {
+      issuanceFees: 0,
+      tradingCommissions: state.platformRevenue,
+      managementFees: 0,
+    };
+  }
+
+  state.platformRevenue[revenueType] =
+    Math.round(((state.platformRevenue[revenueType] || 0) + amount) * 100) /
+    100;
   return state.platformRevenue;
+}
+
+function createLedgerHash(entry) {
+  const hashPayload = JSON.stringify({
+    blockNumber: entry.blockNumber,
+    previousHash: entry.previousHash,
+    propertyId: entry.propertyId,
+    fromUserId: entry.fromUserId,
+    toUserId: entry.toUserId,
+    quantity: entry.quantity,
+    reason: entry.reason,
+    referenceId: entry.referenceId,
+    createdAt: entry.createdAt,
+  });
+
+  return `0x${crypto
+    .createHash("sha256")
+    .update(hashPayload)
+    .digest("hex")
+    .slice(0, 12)}`;
 }
 
 function getRentalDistributions() {

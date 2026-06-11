@@ -2,6 +2,9 @@
 
 export default function TradingPanel({ user, property, platformRevenue }) {
   const defaultType = user.role === "seller" ? "sell" : "buy";
+  const revenue = normalizeRevenue(platformRevenue);
+  const totalRevenue =
+    revenue.issuanceFees + revenue.tradingCommissions + revenue.managementFees;
 
   if (user.role === "admin") {
     return `
@@ -12,9 +15,21 @@ export default function TradingPanel({ user, property, platformRevenue }) {
         </div>
         <div class="metric-row highlight">
           <span>Total platform revenue</span>
-          <strong>${formatMoney(platformRevenue)}</strong>
+          <strong>${formatMoney(totalRevenue)}</strong>
         </div>
-        <p class="muted">BrickShare keeps a simple 0.5% commission from each matched trade.</p>
+        <div class="metric-row">
+          <span>Issuance fee, 2.0%</span>
+          <strong>${formatMoney(revenue.issuanceFees)}</strong>
+        </div>
+        <div class="metric-row">
+          <span>Trading commission, 0.5%</span>
+          <strong>${formatMoney(revenue.tradingCommissions)}</strong>
+        </div>
+        <div class="metric-row">
+          <span>Commission / management fee, 1.0% annual</span>
+          <strong>${formatMoney(revenue.managementFees)}</strong>
+        </div>
+        <p class="muted">Fee revenue is simulated for the demo. No real payments are processed.</p>
       </article>
     `;
   }
@@ -49,6 +64,22 @@ export default function TradingPanel({ user, property, platformRevenue }) {
       </form>
     </article>
   `;
+}
+
+function normalizeRevenue(platformRevenue) {
+  if (typeof platformRevenue === "number") {
+    return {
+      issuanceFees: 0,
+      tradingCommissions: platformRevenue,
+      managementFees: 0,
+    };
+  }
+
+  return {
+    issuanceFees: platformRevenue?.issuanceFees || 0,
+    tradingCommissions: platformRevenue?.tradingCommissions || 0,
+    managementFees: platformRevenue?.managementFees || 0,
+  };
 }
 
 function formatMoney(value) {

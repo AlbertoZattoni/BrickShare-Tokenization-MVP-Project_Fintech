@@ -131,6 +131,7 @@ function createTradeRecord(settlement, transferResult) {
     executionPrice: settlement.executionPrice,
     tradeValue: transferResult.tradeValue,
     platformFee: transferResult.platformFee,
+    tradingCommission: transferResult.tradingCommission,
     buyOrderId: settlement.buyOrder.id,
     sellOrderId: settlement.sellOrder.id,
     createdAt: new Date().toISOString(),
