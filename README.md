@@ -9,7 +9,7 @@ The first MVP uses one demo property: **Rotterdam Student Apartments**. Alice ac
 - View the tokenized property and its basic investment details.
 - Switch between Alice, Bob, and Admin demo users.
 - Place buy and sell orders with partial matching.
-- Match Alice's buy order against Bob's seeded sell order, leaving any unfilled quantity open.
+- Let Bob list tokens for sale, then let Alice buy them through the matching engine.
 - Simulate smart-contract-style token ownership transfer.
 - Track BrickShare revenue streams: issuance fee, trading commission, and commission / management fee.
 - Distribute rental income to current token holders.
@@ -114,13 +114,14 @@ These are simulated platform revenue entries only. The MVP does not process real
 2. Show Rotterdam Student Apartments.
 3. Select Bob and show his token ownership.
 4. Select Alice.
-5. Alice buys 12 tokens at 100.
-6. The matching engine fills Bob's seeded 10-token sell order and leaves 2 tokens open.
-7. The smart contract simulator transfers tokens, cash, and trading commission revenue.
-8. Select Admin and show the three BrickShare revenue streams.
-9. Distribute rental income.
-10. Select Alice and claim rental income.
-11. Reset the demo if needed.
+5. Select Bob and submit a 12-token sell order at 100.
+6. Select Alice and submit a 12-token buy order at 100.
+7. The matching engine executes the trade.
+8. The smart contract simulator transfers tokens, cash, and trading commission revenue.
+9. Select Admin and show the three BrickShare revenue streams.
+10. Distribute rental income.
+11. Select Alice and claim rental income.
+12. Reset the demo if needed.
 
 More detail is available in [docs/demo-script.md](docs/demo-script.md).
 

@@ -55,13 +55,13 @@ The final run-through confirmed:
 1. The frontend serves successfully.
 2. The dashboard loads Alice, Bob, Admin, and Rotterdam Student Apartments.
 3. The demo resets to the seeded state.
-4. Alice buys 10 tokens at 100.
-5. Bob's seeded 10-token sell order is matched.
-6. Alice receives 10 tokens and Bob keeps 90 tokens.
+4. Bob lists 12 tokens at 100.
+5. Alice buys 12 tokens at 100.
+6. Alice receives 12 tokens and Bob keeps 88 tokens.
 7. Admin distributes rental income.
-8. Alice receives 20 claimable rental income.
-9. Bob receives 180 claimable rental income.
-10. Alice claims 20 into her cash balance.
+8. Alice receives 24 claimable rental income.
+9. Bob receives 176 claimable rental income.
+10. Alice claims 24 into her cash balance.
 11. Final reset restores Alice's cash balance to 12,000 and clears trades.
 
 ## MVP Status

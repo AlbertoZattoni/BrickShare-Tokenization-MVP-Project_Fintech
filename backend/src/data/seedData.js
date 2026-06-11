@@ -71,20 +71,7 @@ const seedData = {
     },
   ],
 
-  orders: [
-    {
-      id: "order-bob-sell-001",
-      userId: BOB_ID,
-      propertyId: PROPERTY_ID,
-      type: "sell",
-      originalQuantity: 10,
-      quantity: 10,
-      filledQuantity: 0,
-      limitPrice: 100,
-      status: "open",
-      createdAt: "2026-06-10T15:50:00.000Z",
-    },
-  ],
+  orders: [],
 
   trades: [],
 

@@ -137,7 +137,7 @@ The first MVP uses:
 - Bob as seller
 - Admin as demo controller
 - Rotterdam Student Apartments as the only property
-- Bob's seeded 10-token sell order
+- an empty order book at reset so Bob can list tokens during the demo
 
 Runtime state is held in:
 

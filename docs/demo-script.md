@@ -46,12 +46,24 @@ Select Bob.
 Point out:
 
 - Bob owns 100 tokens
-- Bob has a seeded open sell order for 10 tokens at 100
+- the order book starts empty
 
 Explain:
 
 ```text
 Bob represents an investor who already owns property tokens and wants liquidity through the secondary market.
+```
+
+Submit:
+
+```text
+Sell 12 tokens at 100
+```
+
+Expected result:
+
+```text
+Bob's sell order is now open in the order book.
 ```
 
 ## 4. Show Alice as Buyer
@@ -66,19 +78,19 @@ Point out:
 Submit:
 
 ```text
-Buy 10 tokens at 100
+Buy 12 tokens at 100
 ```
 
 Expected result:
 
 ```text
-Trade matched: Alice bought 10 Rotterdam Student Apartments tokens from Bob at EUR 100 each.
+Trade matched: Alice bought 12 Rotterdam Student Apartments tokens from Bob at EUR 100 each.
 ```
 
 Explain:
 
 ```text
-The matching engine found Bob's exact 10-token sell order. Because Alice's buy price met Bob's sell price, the trade executed.
+The matching engine found Bob's 12-token sell order. Because Alice's buy price met Bob's sell price, the trade executed.
 ```
 
 ## 5. Explain the Architecture
@@ -91,20 +103,20 @@ The frontend sends Alice's order to the backend. The matching engine checks the 
 
 Point to the visible result:
 
-- Alice now owns 10 tokens
-- Bob now owns 90 tokens
+- Alice now owns 12 tokens
+- Bob now owns 88 tokens
 - a trade appears in recent trades
 
 ## 6. Show Partial Matching
 
 Optional demo:
 
-Reset the demo and let Alice buy 12 tokens instead of 10.
+Reset the demo, let Bob sell 12 tokens, then let Alice buy 15 tokens.
 
 Expected result:
 
 ```text
-The matching engine fills Bob's 10-token sell order and leaves Alice's remaining 2 tokens open.
+The matching engine fills Bob's 12-token sell order and leaves Alice's remaining 3 tokens open.
 ```
 
 Explain:
@@ -115,7 +127,7 @@ The engine executes the smaller side of the order. This keeps the secondary mark
 
 ## 7. Show Rental Income Distribution
 
-Return to the normal matched-trade state or repeat Alice's 10-token buy.
+Return to the normal matched-trade state or repeat Bob's 12-token sell order and Alice's 12-token buy order.
 
 Select Admin.
 
@@ -134,7 +146,7 @@ Rental income distributed: EUR 2,000 was allocated to 2 current token holders.
 Explain:
 
 ```text
-Rental income follows current token ownership. After the trade, Alice owns 10 tokens and Bob owns 90 tokens.
+Rental income follows current token ownership. After the trade, Alice owns 12 tokens and Bob owns 88 tokens.
 ```
 
 The property has:
@@ -148,8 +160,8 @@ income per token = 2
 So:
 
 ```text
-Alice receives 20 claimable rent
-Bob receives 180 claimable rent
+Alice receives 24 claimable rent
+Bob receives 176 claimable rent
 ```
 
 ## 8. Show Alice Claiming Rent
