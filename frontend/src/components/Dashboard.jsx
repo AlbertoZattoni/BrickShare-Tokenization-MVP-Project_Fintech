@@ -1,6 +1,7 @@
 // Main one-page dashboard layout and user switcher.
 
 import OrderBook from "./OrderBook.jsx";
+import OwnershipLedger from "./OwnershipLedger.jsx";
 import PortfolioSummary from "./PortfolioSummary.jsx";
 import RentalIncomePanel from "./RentalIncomePanel.jsx";
 import TradingPanel from "./TradingPanel.jsx";
@@ -14,11 +15,21 @@ export default function Dashboard({ state }) {
     return `<main class="app-shell"><p class="status error">${state.error}</p></main>`;
   }
 
-  const { users, properties, holdings, orders, trades, rentalDistributions } =
-    state.data;
+  const {
+    users,
+    properties,
+    holdings,
+    orders,
+    trades,
+    rentalDistributions,
+    ownershipLedger = [],
+    platformRevenue = 0,
+  } = state.data;
   const selectedUser = users.find((user) => user.id === state.selectedUserId);
   const property = properties[0];
-  const openOrders = orders.filter((order) => order.status === "open");
+  const openOrders = orders.filter((order) =>
+    ["open", "partially_filled"].includes(order.status)
+  );
 
   return `
     <main class="app-shell">
@@ -79,13 +90,15 @@ export default function Dashboard({ state }) {
 
       <section class="dashboard-grid">
         ${PortfolioSummary({ user: selectedUser, property, holdings })}
-        ${TradingPanel({ user: selectedUser, property })}
+        ${TradingPanel({ user: selectedUser, property, platformRevenue })}
         ${OrderBook({ users, orders: openOrders, trades })}
         ${RentalIncomePanel({
           user: selectedUser,
           property,
+          holdings,
           rentalDistributions,
         })}
+        ${OwnershipLedger({ users, ledger: ownershipLedger })}
       </section>
     </main>
   `;

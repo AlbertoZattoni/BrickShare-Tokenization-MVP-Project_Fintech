@@ -34,7 +34,8 @@ function renderOrders(users, orders) {
             <div class="table-row">
               <span>${getUserName(users, order.userId)}</span>
               <span class="pill ${order.type}">${order.type}</span>
-              <span>${order.quantity} tokens</span>
+              <span>${order.quantity} open / ${order.originalQuantity || order.quantity} total</span>
+              <span class="status-chip ${order.status}">${formatStatus(order.status)}</span>
               <strong>${formatMoney(order.limitPrice)}</strong>
             </div>
           `
@@ -63,12 +64,21 @@ function renderTrades(users, trades) {
               )}</span>
               <span>${trade.quantity} tokens</span>
               <strong>${formatMoney(trade.executionPrice)}</strong>
+              <span>Fee ${formatMoney(trade.platformFee)}</span>
             </div>
           `
         )
         .join("")}
     </div>
   `;
+}
+
+function formatStatus(status) {
+  if (status === "partially_filled") {
+    return "Partial";
+  }
+
+  return "Open";
 }
 
 function getUserName(users, userId) {

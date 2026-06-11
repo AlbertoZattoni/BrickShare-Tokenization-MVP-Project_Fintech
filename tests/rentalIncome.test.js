@@ -34,6 +34,7 @@ test("rental income is distributed proportionally to current token holders", () 
   assert.equal(claimResult.claimAmount, 20);
   assert.equal(store.getUserById(ids.ALICE_ID).cashBalance, 11020);
   assert.equal(store.getUserById(ids.ALICE_ID).claimableRentalIncome, 0);
+  assert.equal(store.getUserById(ids.ALICE_ID).claimedRentalIncome, 20);
 
   store.resetStore();
 });

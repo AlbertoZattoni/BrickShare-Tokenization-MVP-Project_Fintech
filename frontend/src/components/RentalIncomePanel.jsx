@@ -1,7 +1,19 @@
-// Shows claimable rent and Admin controls for rental income distribution.
+// Shows rent pool, ownership math, and claim status.
 
-export default function RentalIncomePanel({ user, property, rentalDistributions }) {
+export default function RentalIncomePanel({
+  user,
+  property,
+  holdings,
+  rentalDistributions,
+}) {
   const latestDistribution = rentalDistributions[rentalDistributions.length - 1];
+  const holding = holdings.find(
+    (item) => item.userId === user.id && item.propertyId === property.id
+  );
+  const tokenBalance = holding ? holding.tokenBalance : 0;
+  const ownershipPercent = (tokenBalance / property.totalTokens) * 100;
+  const monthlyShare =
+    (tokenBalance / property.totalTokens) * property.monthlyRentPool;
 
   return `
     <article class="panel">
@@ -10,8 +22,27 @@ export default function RentalIncomePanel({ user, property, rentalDistributions 
         <h2>Income panel</h2>
       </div>
       <div class="metric-row">
-        <span>Available to claim</span>
+        <span>Total monthly rent pool</span>
+        <strong>${formatMoney(property.monthlyRentPool)}</strong>
+      </div>
+      <div class="metric-row">
+        <span>${user.name}'s tokens owned</span>
+        <strong>${tokenBalance}</strong>
+      </div>
+      <div class="metric-row">
+        <span>Ownership percentage</span>
+        <strong>${ownershipPercent.toFixed(1)}%</strong>
+      </div>
+      <p class="formula">${tokenBalance} / ${property.totalTokens} &times; ${formatMoney(
+    property.monthlyRentPool
+  )} = ${formatMoney(monthlyShare)}</p>
+      <div class="metric-row">
+        <span>Claimable rental income</span>
         <strong>${formatMoney(user.claimableRentalIncome)}</strong>
+      </div>
+      <div class="metric-row">
+        <span>Claimed rental income</span>
+        <strong>${formatMoney(user.claimedRentalIncome || 0)}</strong>
       </div>
       ${
         user.role === "admin"

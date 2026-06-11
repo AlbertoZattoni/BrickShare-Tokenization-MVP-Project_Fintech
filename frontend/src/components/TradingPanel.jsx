@@ -1,6 +1,6 @@
-// Buy/sell form for exact-quantity token trades.
+// Buy/sell form for simple token trades.
 
-export default function TradingPanel({ user, property }) {
+export default function TradingPanel({ user, property, platformRevenue }) {
   const defaultType = user.role === "seller" ? "sell" : "buy";
 
   if (user.role === "admin") {
@@ -10,7 +10,11 @@ export default function TradingPanel({ user, property }) {
           <p class="eyebrow">Trading</p>
           <h2>Admin view</h2>
         </div>
-        <p class="muted">Switch to Alice or Bob to place demo buy and sell orders.</p>
+        <div class="metric-row highlight">
+          <span>Total platform revenue</span>
+          <strong>${formatMoney(platformRevenue)}</strong>
+        </div>
+        <p class="muted">BrickShare keeps a simple 0.5% commission from each matched trade.</p>
       </article>
     `;
   }
@@ -21,7 +25,7 @@ export default function TradingPanel({ user, property }) {
         <p class="eyebrow">Secondary market</p>
         <h2>Place order</h2>
       </div>
-      <p class="muted">Version one matches only exact quantities. Alice can match Bob's seeded 10-token sell order.</p>
+      <p class="muted">Orders can partially fill: the smaller side trades, and the remaining tokens stay open.</p>
       <form class="trade-form" data-order-form>
         <input type="hidden" name="propertyId" value="${property.id}" />
         <label>
@@ -32,8 +36,8 @@ export default function TradingPanel({ user, property }) {
           </select>
         </label>
         <label>
-          Exact quantity
-          <input name="quantity" type="number" min="1" step="1" value="10" />
+          Quantity
+          <input name="quantity" type="number" min="1" step="1" value="12" />
         </label>
         <label>
           Limit price
@@ -45,4 +49,12 @@ export default function TradingPanel({ user, property }) {
       </form>
     </article>
   `;
+}
+
+function formatMoney(value) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(value);
 }

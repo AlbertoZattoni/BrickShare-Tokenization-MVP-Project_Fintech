@@ -121,6 +121,9 @@ function claimRentalIncome({ userId }) {
 
   user.cashBalance = roundMoney(user.cashBalance + claimAmount);
   user.claimableRentalIncome = 0;
+  user.claimedRentalIncome = roundMoney(
+    (user.claimedRentalIncome || 0) + claimAmount
+  );
 
   return {
     success: true,
@@ -131,6 +134,7 @@ function claimRentalIncome({ userId }) {
     claimAmount,
     cashBalance: user.cashBalance,
     claimableRentalIncome: user.claimableRentalIncome,
+    claimedRentalIncome: user.claimedRentalIncome,
   };
 }
 

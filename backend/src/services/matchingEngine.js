@@ -1,5 +1,5 @@
-// Exact-quantity matching engine for the BrickShare MVP.
-// Version one does not support partial fills; quantities must match exactly.
+// Simple matching engine for the BrickShare MVP.
+// It fills the smaller side of a matching buy/sell pair and leaves the rest open.
 
 const store = require("../data/store");
 const smartContract = require("./smartContractSimulator");
@@ -91,21 +91,22 @@ function pricesCross(newOrder, existingOrder) {
   return existingOrder.limitPrice >= newOrder.limitPrice;
 }
 
-function findExactMatch(newOrder) {
+function findMatch(newOrder) {
   const oppositeType = getOppositeOrderType(newOrder.type);
 
   return store.getOpenOrders().find((existingOrder) => {
     return (
+      existingOrder.id !== newOrder.id &&
       existingOrder.userId !== newOrder.userId &&
       existingOrder.propertyId === newOrder.propertyId &&
       existingOrder.type === oppositeType &&
-      existingOrder.quantity === newOrder.quantity &&
+      existingOrder.quantity > 0 &&
       pricesCross(newOrder, existingOrder)
     );
   });
 }
 
-function buildSettlement(newOrder, matchedOrder) {
+function buildSettlement(newOrder, matchedOrder, quantity) {
   const buyOrder = newOrder.type === "buy" ? newOrder : matchedOrder;
   const sellOrder = newOrder.type === "sell" ? newOrder : matchedOrder;
 
@@ -113,7 +114,7 @@ function buildSettlement(newOrder, matchedOrder) {
     buyerId: buyOrder.userId,
     sellerId: sellOrder.userId,
     propertyId: newOrder.propertyId,
-    quantity: newOrder.quantity,
+    quantity,
     executionPrice: sellOrder.limitPrice,
     buyOrder,
     sellOrder,
@@ -122,7 +123,7 @@ function buildSettlement(newOrder, matchedOrder) {
 
 function createTradeRecord(settlement, transferResult) {
   return {
-    id: createId("trade"),
+    id: settlement.tradeId || createId("trade"),
     propertyId: settlement.propertyId,
     buyerId: settlement.buyerId,
     sellerId: settlement.sellerId,
@@ -134,6 +135,18 @@ function createTradeRecord(settlement, transferResult) {
     sellOrderId: settlement.sellOrder.id,
     createdAt: new Date().toISOString(),
   };
+}
+
+function applyOrderFill(order, fillQuantity) {
+  const filledQuantity = (order.filledQuantity || 0) + fillQuantity;
+  const remainingQuantity = order.quantity - fillQuantity;
+  const status = remainingQuantity === 0 ? "matched" : "partially_filled";
+
+  return store.updateOrder(order.id, {
+    quantity: remainingQuantity,
+    filledQuantity,
+    status,
+  });
 }
 
 function placeOrder(orderInput) {
@@ -152,7 +165,9 @@ function placeOrder(orderInput) {
     userId: orderInput.userId,
     propertyId: orderInput.propertyId,
     type: orderInput.type,
+    originalQuantity: orderInput.quantity,
     quantity: orderInput.quantity,
+    filledQuantity: 0,
     limitPrice: orderInput.limitPrice,
     status: "open",
     createdAt: orderInput.createdAt || new Date().toISOString(),
@@ -160,65 +175,85 @@ function placeOrder(orderInput) {
 
   store.addOrder(newOrder);
 
-  const matchedOrder = findExactMatch(newOrder);
+  const matchedTrades = [];
+  let matchedOrder = findMatch(newOrder);
 
-  if (!matchedOrder) {
+  while (matchedOrder && newOrder.quantity > 0) {
+    const fillQuantity = Math.min(newOrder.quantity, matchedOrder.quantity);
+    const settlement = buildSettlement(newOrder, matchedOrder, fillQuantity);
+    const tradeId = createId("trade");
+    const transferResult = smartContract.transferTokens({
+      propertyId: settlement.propertyId,
+      sellerId: settlement.sellerId,
+      buyerId: settlement.buyerId,
+      quantity: settlement.quantity,
+      price: settlement.executionPrice,
+      referenceId: tradeId,
+    });
+
+    if (!transferResult.success) {
+      store.updateOrder(newOrder.id, {
+        status: matchedTrades.length > 0 ? "partially_filled" : "rejected",
+        rejectionReason: transferResult.reason,
+      });
+
+      return {
+        success: matchedTrades.length > 0,
+        status: matchedTrades.length > 0 ? "partially_filled" : "rejected",
+        reason: `Order rejected: ${transferResult.reason}`,
+        order: newOrder,
+        trades: matchedTrades,
+      };
+    }
+
+    applyOrderFill(newOrder, fillQuantity);
+    applyOrderFill(matchedOrder, fillQuantity);
+
+    const trade = store.addTrade(
+      createTradeRecord({ ...settlement, tradeId }, transferResult)
+    );
+    matchedTrades.push(trade);
+    matchedOrder = findMatch(newOrder);
+  }
+
+  if (matchedTrades.length === 0) {
     return {
       success: true,
       status: "open",
       message:
-        "Order submitted. No exact match found yet, so it remains open in the order book.",
+        "Order submitted. No matching order has crossed its price yet, so it remains open in the order book.",
       order: newOrder,
     };
   }
 
-  const settlement = buildSettlement(newOrder, matchedOrder);
-  const transferResult = smartContract.transferTokens({
-    propertyId: settlement.propertyId,
-    sellerId: settlement.sellerId,
-    buyerId: settlement.buyerId,
-    quantity: settlement.quantity,
-    price: settlement.executionPrice,
-  });
-
-  if (!transferResult.success) {
-    store.updateOrder(newOrder.id, {
-      status: "rejected",
-      rejectionReason: transferResult.reason,
-    });
-
-    return {
-      success: false,
-      status: "rejected",
-      reason: `Order rejected: ${transferResult.reason}`,
-      order: newOrder,
-    };
-  }
-
-  store.updateOrder(newOrder.id, { status: "matched" });
-  store.updateOrder(matchedOrder.id, { status: "matched" });
-
-  const trade = store.addTrade(createTradeRecord(settlement, transferResult));
+  const filledQuantity = matchedTrades.reduce(
+    (total, trade) => total + trade.quantity,
+    0
+  );
+  const status = newOrder.quantity > 0 ? "partially_filled" : "matched";
+  const firstTrade = matchedTrades[0];
+  const lastTrade = matchedTrades[matchedTrades.length - 1];
 
   return {
     success: true,
-    status: "matched",
-    message: `Trade matched: ${getUserName(settlement.buyerId)} bought ${
-      settlement.quantity
-    } ${getPropertyName(settlement.propertyId)} tokens from ${getUserName(
-      settlement.sellerId
-    )} at ${formatMoney(
-      settlement.executionPrice
-    )} each. Ownership and cash balances were updated automatically.`,
+    status,
+    message: `Trade matched: ${getUserName(firstTrade.buyerId)} bought ${
+      filledQuantity
+    } ${getPropertyName(firstTrade.propertyId)} tokens from ${getUserName(
+      firstTrade.sellerId
+    )} at ${formatMoney(firstTrade.executionPrice)} each. ${
+      newOrder.quantity > 0
+        ? `${newOrder.quantity} token${newOrder.quantity === 1 ? "" : "s"} remain open.`
+        : "The order was fully filled."
+    }`,
     order: newOrder,
-    matchedOrder,
-    trade,
-    settlement: transferResult,
+    trade: lastTrade,
+    trades: matchedTrades,
   };
 }
 
 module.exports = {
   validateOrderInput,
-  findExactMatch,
+  findMatch,
   placeOrder,
 };

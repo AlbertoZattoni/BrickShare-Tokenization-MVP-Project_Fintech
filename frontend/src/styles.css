@@ -179,6 +179,19 @@ button:disabled {
   margin-bottom: 16px;
 }
 
+.compact-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.compact-header .muted {
+  max-width: 360px;
+  margin: 0;
+  text-align: right;
+}
+
 .metric-row,
 .table-row {
   display: flex;
@@ -236,6 +249,8 @@ button:disabled {
 
 .table-row {
   font-size: 14px;
+  flex-wrap: wrap;
+  padding: 6px 0;
 }
 
 .pill {
@@ -258,15 +273,59 @@ button:disabled {
   color: #7a5500;
 }
 
+.status-chip {
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: #eef2f5;
+  color: #304255;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-chip.partially_filled {
+  background: #fff1ef;
+  color: #9d2c1f;
+}
+
+.formula {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border: 1px solid #dfe5eb;
+  border-radius: 8px;
+  background: #f7fbff;
+  color: #304255;
+  font-weight: 700;
+}
+
+.ledger-table {
+  border-top: 1px solid #eef2f5;
+}
+
+.ledger-row {
+  display: grid;
+  grid-template-columns: 120px 1.4fr 120px 1fr;
+}
+
 @media (max-width: 820px) {
   .topbar,
-  .market-grid {
+  .market-grid,
+  .compact-header,
+  .ledger-row {
     grid-template-columns: 1fr;
   }
 
   .topbar {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .compact-header {
+    display: grid;
+  }
+
+  .compact-header .muted {
+    max-width: none;
+    text-align: left;
   }
 
   .property-strip,

@@ -26,21 +26,25 @@ test("matching engine settles an exact-quantity buy order against Bob's sell ord
   store.resetStore();
 });
 
-test("matching engine keeps a non-exact quantity order open", () => {
+test("matching engine partially fills the smaller side and leaves the rest open", () => {
   store.resetStore();
 
   const result = matchingEngine.placeOrder({
     userId: ids.ALICE_ID,
     propertyId: ids.PROPERTY_ID,
     type: "buy",
-    quantity: 7,
+    quantity: 12,
     limitPrice: 100,
   });
 
   assert.equal(result.success, true);
-  assert.equal(result.status, "open");
-  assert.equal(store.getTrades().length, 0);
-  assert.equal(store.getOpenOrders().length, 2);
+  assert.equal(result.status, "partially_filled");
+  assert.equal(store.getTrades().length, 1);
+  assert.equal(store.getOpenOrders().length, 1);
+  assert.equal(store.getOpenOrders()[0].quantity, 2);
+  assert.equal(store.getOpenOrders()[0].filledQuantity, 10);
+  assert.equal(store.getHolding(ids.ALICE_ID, ids.PROPERTY_ID).tokenBalance, 10);
+  assert.equal(store.getHolding(ids.BOB_ID, ids.PROPERTY_ID).tokenBalance, 90);
 
   store.resetStore();
 });

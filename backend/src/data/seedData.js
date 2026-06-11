@@ -14,6 +14,7 @@ const seedData = {
       role: "buyer",
       cashBalance: 12000,
       claimableRentalIncome: 0,
+      claimedRentalIncome: 0,
       verified: true,
     },
     {
@@ -22,6 +23,7 @@ const seedData = {
       role: "seller",
       cashBalance: 2500,
       claimableRentalIncome: 0,
+      claimedRentalIncome: 0,
       verified: true,
     },
     {
@@ -30,6 +32,7 @@ const seedData = {
       role: "admin",
       cashBalance: 0,
       claimableRentalIncome: 0,
+      claimedRentalIncome: 0,
       verified: true,
     },
   ],
@@ -70,7 +73,9 @@ const seedData = {
       userId: BOB_ID,
       propertyId: PROPERTY_ID,
       type: "sell",
+      originalQuantity: 10,
       quantity: 10,
+      filledQuantity: 0,
       limitPrice: 100,
       status: "open",
       createdAt: "2026-06-10T15:50:00.000Z",
@@ -78,6 +83,20 @@ const seedData = {
   ],
 
   trades: [],
+
+  ownershipLedger: [
+    {
+      id: "ledger-initial-bob",
+      propertyId: PROPERTY_ID,
+      fromUserId: "issuer",
+      toUserId: BOB_ID,
+      quantity: 100,
+      reason: "Initial token allocation",
+      createdAt: "2026-06-10T15:45:00.000Z",
+    },
+  ],
+
+  platformRevenue: 0,
 
   rentalDistributions: [],
 };

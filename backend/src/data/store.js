@@ -73,7 +73,9 @@ function getOrders() {
 }
 
 function getOpenOrders() {
-  return state.orders.filter((order) => order.status === "open");
+  return state.orders.filter((order) =>
+    ["open", "partially_filled"].includes(order.status)
+  );
 }
 
 function addOrder(order) {
@@ -99,6 +101,21 @@ function getTrades() {
 function addTrade(trade) {
   state.trades.push(trade);
   return trade;
+}
+
+function getOwnershipLedger() {
+  return state.ownershipLedger;
+}
+
+function addOwnershipLedgerEntry(entry) {
+  state.ownershipLedger.push(entry);
+  return entry;
+}
+
+function addPlatformRevenue(amount) {
+  state.platformRevenue =
+    Math.round((state.platformRevenue + amount) * 100) / 100;
+  return state.platformRevenue;
 }
 
 function getRentalDistributions() {
@@ -127,6 +144,9 @@ module.exports = {
   updateOrder,
   getTrades,
   addTrade,
+  getOwnershipLedger,
+  addOwnershipLedgerEntry,
+  addPlatformRevenue,
   getRentalDistributions,
   addRentalDistribution,
 };

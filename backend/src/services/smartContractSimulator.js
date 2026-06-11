@@ -9,6 +9,10 @@ function roundMoney(value) {
   return Math.round(value * 100) / 100;
 }
 
+function createId(prefix) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+}
+
 function formatMoney(value) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -79,7 +83,14 @@ function getOrCreateHolding(userId, propertyId) {
   });
 }
 
-function transferTokens({ propertyId, sellerId, buyerId, quantity, price }) {
+function transferTokens({
+  propertyId,
+  sellerId,
+  buyerId,
+  quantity,
+  price,
+  referenceId,
+}) {
   const validation = validateTransfer({
     propertyId,
     sellerId,
@@ -106,11 +117,23 @@ function transferTokens({ propertyId, sellerId, buyerId, quantity, price }) {
 
   buyer.cashBalance = roundMoney(buyer.cashBalance - tradeValue);
   seller.cashBalance = roundMoney(seller.cashBalance + sellerProceeds);
+  store.addPlatformRevenue(platformFee);
 
   sellerHolding.tokenBalance -= quantity;
   buyerHolding.tokenBalance += quantity;
 
   buyerHolding.averagePurchasePrice = price;
+
+  const ledgerEntry = store.addOwnershipLedgerEntry({
+    id: createId("ledger"),
+    propertyId,
+    fromUserId: sellerId,
+    toUserId: buyerId,
+    quantity,
+    reason: "Matched trade token transfer",
+    referenceId,
+    createdAt: new Date().toISOString(),
+  });
 
   return {
     success: true,
@@ -129,6 +152,7 @@ function transferTokens({ propertyId, sellerId, buyerId, quantity, price }) {
     sellerCashBalance: seller.cashBalance,
     buyerTokenBalance: buyerHolding.tokenBalance,
     sellerTokenBalance: sellerHolding.tokenBalance,
+    ledgerEntry,
   };
 }
 
