@@ -9,7 +9,7 @@ import {
 } from "./api.js";
 import Dashboard from "./components/Dashboard.jsx";
 
-const DEFAULT_USER_ID = "user-alice";
+const DEFAULT_USER_ID = "user-bob";
 
 export default function App(root) {
   const state = {
