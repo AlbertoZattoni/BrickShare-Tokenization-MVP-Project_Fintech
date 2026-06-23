@@ -4,14 +4,17 @@ BrickShare is a simple educational MVP for a tokenized real estate platform. It 
 
 The first MVP uses one active demo property: **Rotterdam Apartment**. Serena acts as the retail investor, Alberto acts as the property owner / issuer, and Admin acts as the platform operator.
 
+This version is a **primary-market MVP**. It does not implement a secondary-market order book. The demo focuses on the first issuance of property tokens: the owner submits a property, Admin approves and tokenizes it, and the investor buys fixed-price tokens directly from that primary listing.
+
 ## Core Features
 
-- View the tokenized property and its basic investment details.
+- View the property and its investment details.
 - Switch between Serena, Alberto, and Admin demo users.
-- Let Alberto enter house details and tokenize/list the property as a fixed-price primary offering.
+- Let Alberto submit the property for platform review.
+- Let Admin approve the property and trigger simulated token minting.
 - Let Serena choose a property and buy tokens by quantity only.
 - Simulate smart-contract-style token ownership transfer.
-- Track BrickShare issuance fee revenue.
+- Track BrickShare's 2.0% issuance fee paid by the property owner.
 - Distribute rental income to current token holders.
 - Claim rental income into a user's cash balance.
 - Reset the demo to the original seeded state.
@@ -22,15 +25,24 @@ BrickShare uses a simple three-layer MVP architecture:
 
 ```text
 Single Dashboard Frontend
+Dashboard, TradingPanel, PortfolioSummary, OrderBook, RentalIncomePanel
         |
         v
 Backend API
+dashboard, property listing, approval, primary investment, rent, reset
         |
         v
-Smart Contract Simulation and In-Memory Store
+Business Services
+primaryOfferingService, smartContractSimulator, rentalIncomeService
+        |
+        v
+In-Memory Store
+seeded users, properties, holdings, investments, rental distributions
 ```
 
-The frontend gives users a clear investment dashboard. The backend receives actions such as listing a property, buying fixed-price tokens, distributing rent, claiming rent, and resetting the demo. The smart contract simulator updates token ownership, cash balances, available token supply, and BrickShare issuance fee revenue.
+The frontend gives users a clear investment dashboard. The backend receives actions such as submitting a property listing, approving and tokenizing the property, buying fixed-price primary tokens, distributing rent, claiming rent, and resetting the demo.
+
+The smart-contract simulation layer represents what a future Solidity smart contract would do. It updates token ownership, cash balances, available token supply, funding progress, and rental income balances. No real blockchain is deployed in this MVP.
 
 More detail is available in [docs/architecture.md](docs/architecture.md).
 
@@ -38,8 +50,8 @@ More detail is available in [docs/architecture.md](docs/architecture.md).
 
 ```text
 frontend/                 Single dashboard UI
-backend/                  API, demo store, primary offering, transfer, and rental logic
-tests/                    Focused tests for the three core business features
+backend/                  API, demo store, primary offering, token transfer, and rental logic
+tests/                    Focused tests for primary offering, token transfer, and rent logic
 docs/                     Architecture and demo notes
 .codex/                   AI-agent instructions for this repository
 ```
@@ -91,10 +103,26 @@ node --test tests/*.test.js
 
 The tests cover:
 
+- property listing submission and Admin tokenization
 - fixed-price primary token purchase
 - smart-contract-style token and cash transfer
 - BrickShare fee revenue
 - proportional rental income distribution
+
+## Primary-Market Flow
+
+The MVP follows this sequence:
+
+1. Alberto submits the property listing.
+2. BrickShare records the 2.0% issuance fee paid by Alberto.
+3. Listing status becomes `Pending Review`.
+4. Admin clicks `Approve & Tokenize`.
+5. The backend simulates smart-contract deployment and token minting.
+6. The listing becomes live on the primary market.
+7. Serena buys fixed-price tokens directly from the listing.
+8. Ownership, cash balances, and funding progress update automatically.
+9. Admin distributes monthly rent.
+10. Serena claims rental income.
 
 ## BrickShare Fee Model
 
@@ -104,25 +132,33 @@ The MVP keeps fees simple and demo-friendly:
 | --- | ---: | --- |
 | Issuance fee | 2.0% | Paid once by Alberto when he submits the property listing. |
 
-These are simulated platform revenue entries only. The MVP does not process real payments.
+For the demo:
+
+```text
+Funding target = EUR 500,000
+Issuance fee = 2%
+BrickShare revenue = EUR 10,000
+```
+
+These are simulated platform revenue entries only. The MVP does not process real payments. Serena's later token purchases do not create extra issuance fees.
 
 ## Demo Flow
 
 1. Open the dashboard.
 2. Show Rotterdam Apartment.
 3. Select Alberto and enter the house details:
-   - address: Rotterdam Apartment
+   - property name: Rotterdam Apartment
    - valuation: EUR 500,000
    - funding target: EUR 500,000
    - number of tokens: 10,000
    - token price: EUR 50
    - expected rental yield: 5%
-4. Alberto submits the listing. Status becomes Pending Review.
+4. Alberto submits the listing. BrickShare records the EUR 10,000 issuance fee and status becomes Pending Review.
 5. Select Admin and click Approve & Tokenize.
-6. Status becomes Live on Primary Market with 10,000 tokens available.
+6. Status becomes Live on Primary Market with 10,000 tokens available at EUR 50 each.
 7. Select Serena.
 8. Serena chooses Rotterdam Apartment from the property selector.
-9. Serena buys 100 tokens at the fixed price of 50.
+9. Serena buys 100 tokens at the fixed price of EUR 50.
 10. The smart contract simulator transfers tokens and cash; BrickShare's issuance fee was already paid by Alberto during listing submission.
 11. Admin distributes rental income.
 12. Serena claims rental income.
@@ -138,6 +174,7 @@ More detail is available in [docs/demo-script.md](docs/demo-script.md).
 - Only Rotterdam Apartment has real demo data; other property options are placeholders.
 - There is no secondary-market order book in the current primary-market MVP.
 - The platform uses seeded demo users instead of authentication.
+- Document upload, property verification, KYC, and smart-contract deployment are simulated.
 
 ## AI Tools and Agent Orchestration
 
