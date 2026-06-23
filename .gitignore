@@ -3,6 +3,7 @@ node_modules/
 dist/
 .env
 .DS_Store
+.Rhistory
 coverage/
 work/
 outputs/
