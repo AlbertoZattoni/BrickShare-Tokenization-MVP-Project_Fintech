@@ -38,6 +38,17 @@ function getPropertyById(propertyId) {
   return state.properties.find((property) => property.id === propertyId);
 }
 
+function updateProperty(propertyId, updates) {
+  const property = getPropertyById(propertyId);
+
+  if (!property) {
+    return null;
+  }
+
+  Object.assign(property, updates);
+  return property;
+}
+
 function getHoldings() {
   return state.holdings;
 }
@@ -68,46 +79,23 @@ function upsertHolding(nextHolding) {
   return state.holdings[index];
 }
 
-function getOrders() {
-  return state.orders;
+function getInvestments() {
+  return state.investments || [];
 }
 
-function getOpenOrders() {
-  return state.orders.filter((order) =>
-    ["open", "partially_filled"].includes(order.status)
-  );
-}
-
-function addOrder(order) {
-  state.orders.push(order);
-  return order;
-}
-
-function updateOrder(orderId, updates) {
-  const order = state.orders.find((item) => item.id === orderId);
-
-  if (!order) {
-    return null;
+function addInvestment(investment) {
+  if (!state.investments) {
+    state.investments = [];
   }
 
-  Object.assign(order, updates);
-  return order;
-}
-
-function getTrades() {
-  return state.trades;
-}
-
-function addTrade(trade) {
-  state.trades.push(trade);
-  return trade;
+  state.investments.push(investment);
+  return investment;
 }
 
 function addPlatformRevenue(revenueType, amount) {
   if (typeof state.platformRevenue === "number") {
     state.platformRevenue = {
-      issuanceFees: 0,
-      tradingCommissions: state.platformRevenue,
+      issuanceFees: state.platformRevenue,
       managementFees: 0,
     };
   }
@@ -135,15 +123,12 @@ module.exports = {
   getUserById,
   getProperties,
   getPropertyById,
+  updateProperty,
   getHoldings,
   getHolding,
   upsertHolding,
-  getOrders,
-  getOpenOrders,
-  addOrder,
-  updateOrder,
-  getTrades,
-  addTrade,
+  getInvestments,
+  addInvestment,
   addPlatformRevenue,
   getRentalDistributions,
   addRentalDistribution,

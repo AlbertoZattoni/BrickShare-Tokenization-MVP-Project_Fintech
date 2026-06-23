@@ -22,10 +22,24 @@ export function getDashboard() {
   return request("/dashboard");
 }
 
-export function placeOrder(order) {
-  return request("/orders", {
+export function listProperty(listing) {
+  return request("/properties/list", {
     method: "POST",
-    body: JSON.stringify(order),
+    body: JSON.stringify(listing),
+  });
+}
+
+export function approveAndTokenize(propertyId, adminId) {
+  return request("/properties/approve", {
+    method: "POST",
+    body: JSON.stringify({ propertyId, adminId }),
+  });
+}
+
+export function buyPrimaryTokens(investment) {
+  return request("/investments", {
+    method: "POST",
+    body: JSON.stringify(investment),
   });
 }
 

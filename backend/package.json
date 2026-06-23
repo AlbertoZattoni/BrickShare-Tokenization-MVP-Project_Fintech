@@ -2,7 +2,7 @@
   "name": "brickshare-mvp-backend",
   "version": "0.1.0",
   "private": true,
-  "description": "Node backend for BrickShare matching, token transfer simulation, and rent distribution.",
+  "description": "Node backend for BrickShare primary offerings, token transfer simulation, and rent distribution.",
   "main": "src/server.js",
   "scripts": {
     "dev": "node src/server.js",

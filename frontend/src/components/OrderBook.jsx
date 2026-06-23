@@ -1,86 +1,65 @@
-// Displays open orders and recent matched trades.
+// Displays recent primary investments.
 
-export default function OrderBook({ users, orders, trades }) {
+export default function OrderBook({ users, property, investments }) {
+  const fundingPercent =
+    property.totalTokens > 0
+      ? ((property.tokensSold || 0) / property.totalTokens) * 100
+      : 0;
+
   return `
     <article class="panel wide">
       <div class="panel-header">
-        <p class="eyebrow">Market activity</p>
-        <h2>Order book</h2>
+        <p class="eyebrow">Investment activity</p>
+        <h2>Primary offering purchases</h2>
       </div>
       <div class="market-grid">
         <div>
-          <h3>Open orders</h3>
-          ${renderOrders(users, orders)}
+          <h3>Offering status</h3>
+          <div class="metric-row">
+            <span>Tokens sold</span>
+            <strong>${property.tokensSold || 0} / ${property.totalTokens || 0}</strong>
+          </div>
+          <div class="metric-row">
+            <span>Funding progress</span>
+            <strong>${fundingPercent.toFixed(1)}%</strong>
+          </div>
+          <p class="muted">Investors buy fixed-price tokens directly from the approved primary listing.</p>
         </div>
         <div>
-          <h3>Recent trades</h3>
-          ${renderTrades(users, trades)}
+          <h3>Recent investments</h3>
+          ${renderInvestments(users, investments)}
         </div>
       </div>
     </article>
   `;
 }
 
-function renderOrders(users, orders) {
-  if (orders.length === 0) {
-    return `<p class="muted">No open orders.</p>`;
+function renderInvestments(users, investments) {
+  if (!investments || investments.length === 0) {
+    return `<p class="muted">No primary investments yet.</p>`;
   }
 
   return `
     <div class="table">
-      ${orders
-        .map(
-          (order) => `
-            <div class="table-row">
-              <span>${getUserName(users, order.userId)}</span>
-              <span class="pill ${order.type}">${order.type}</span>
-              <span>${order.quantity} open / ${order.originalQuantity || order.quantity} total</span>
-              <span class="status-chip ${order.status}">${formatStatus(order.status)}</span>
-              <strong>${formatMoney(order.limitPrice)}</strong>
-            </div>
-          `
-        )
-        .join("")}
-    </div>
-  `;
-}
-
-function renderTrades(users, trades) {
-  if (trades.length === 0) {
-    return `<p class="muted">No trades yet.</p>`;
-  }
-
-  return `
-    <div class="table">
-      ${trades
+      ${investments
         .slice()
         .reverse()
         .map(
-          (trade) => `
+          (investment) => `
             <div class="table-row">
-              <span>${getUserName(users, trade.buyerId)} bought from ${getUserName(
+              <span>${getUserName(users, investment.investorId)} bought from ${getUserName(
                 users,
-                trade.sellerId
+                investment.issuerId
               )}</span>
-              <span>${trade.quantity} tokens</span>
-              <strong>${formatMoney(trade.executionPrice)}</strong>
-              <span>Commission ${formatMoney(
-                trade.tradingCommission || trade.platformFee || 0
-              )}</span>
+              <span>${investment.quantity} tokens</span>
+              <strong>${formatMoney(investment.tokenPrice)}</strong>
+              <span>${formatMoney(investment.investmentValue)} invested</span>
             </div>
           `
         )
         .join("")}
     </div>
   `;
-}
-
-function formatStatus(status) {
-  if (status === "partially_filled") {
-    return "Partial";
-  }
-
-  return "Open";
 }
 
 function getUserName(users, userId) {

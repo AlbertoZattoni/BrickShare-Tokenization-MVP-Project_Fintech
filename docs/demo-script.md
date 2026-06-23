@@ -1,19 +1,19 @@
 # Demo Script
 
-This script is designed for a short investor-oriented demo. It focuses on the core value: BrickShare makes real estate investing more accessible and liquid by turning a property into tradable tokens with automated rental income distribution.
+This script is designed for a short investor-oriented demo. It focuses on the core value: BrickShare turns a property into fixed-price tokens and makes ownership and rental income easy to understand.
 
 ## 1. Opening
 
 Introduce BrickShare:
 
 ```text
-BrickShare is a tokenized real estate platform. It lets retail investors buy small fractions of a property, trade those tokens in a secondary market, and receive rental income based on their ownership.
+BrickShare is a tokenized real estate platform. It lets retail investors buy small fractions of a property and receive rental income based on their ownership.
 ```
 
 Mention the MVP scope:
 
 ```text
-This MVP uses one demo property, Rotterdam Student Apartments, and three demo users: Alice, Bob, and Admin.
+This MVP uses one active demo property, Rotterdam Apartment, and three demo users: Serena, Alberto, and Admin.
 ```
 
 ## 2. Show the Dashboard
@@ -26,108 +26,133 @@ http://localhost:5173
 
 Point out:
 
-- property details
+- property selector
 - token price
-- monthly rent pool
+- available tokens
 - expected yield
-- Alice, Bob, and Admin switcher
-- portfolio, trading, order book, and rental panels
+- investment status
+- Serena, Alberto, and Admin switcher
+- portfolio, primary offering, investment activity, and rental panels
 
 Explain:
 
 ```text
-The GUI keeps blockchain-style investing simple. Users do not interact with smart contract code; they use familiar actions such as submit order and claim rental income.
+The GUI keeps blockchain-style investing simple. Users do not interact with smart contract code; they use familiar actions such as buy tokens and claim rental income.
 ```
 
-## 3. Show Bob as Seller
+## 3. Alberto Lists The Property
 
-Select Bob.
-
-Point out:
-
-- Bob owns 100 tokens
-- the order book starts empty
+Select Alberto.
 
 Explain:
 
 ```text
-Bob represents an investor who already owns property tokens and wants liquidity through the secondary market.
+Alberto is the property owner. He starts by submitting the house for platform review.
 ```
 
-Submit:
+Point to the form fields:
 
 ```text
-Sell 12 tokens at 100
+Address / name: Rotterdam Apartment
+Valuation: EUR 500,000
+Funding target: EUR 500,000
+Number of tokens: 10,000
+Token price: EUR 50
+Expected rental yield: 5%
+```
+
+Explain:
+
+```text
+Alberto is not starting with a token portfolio. He starts with a house. Submitting the listing is the off-chain onboarding step.
+BrickShare charges Alberto a 2% issuance fee on the EUR 500,000 funding target, so the platform records EUR 10,000 in fee revenue at this step.
+```
+
+Click:
+
+```text
+Submit Listing
 ```
 
 Expected result:
 
 ```text
-Bob's sell order is now open in the order book.
+Status: Pending Review
 ```
 
-## 4. Show Alice as Buyer
+## 4. Admin Approves And Tokenizes
 
-Select Alice.
+Select Admin.
 
-Point out:
-
-- Alice has cash
-- Alice starts with 0 property tokens
-
-Submit:
+Click:
 
 ```text
-Buy 12 tokens at 100
+Approve & Tokenize
 ```
 
 Expected result:
 
 ```text
-Trade matched: Alice bought 12 Rotterdam Student Apartments tokens from Bob at EUR 100 each.
+Status: Live on Primary Market
+10,000 property tokens created
+Token price: EUR 50
+Tokens available: 10,000
 ```
 
 Explain:
 
 ```text
-The matching engine found Bob's 12-token sell order. Because Alice's buy price met Bob's sell price, the trade executed.
+The listing step is off-chain review. The simulated smart contract starts when Admin approves the property and the platform mints the tokens.
 ```
 
-## 5. Explain the Architecture
+## 5. Serena Buys Tokens
+
+Select Serena.
+
+Point out:
+
+- Serena has cash
+- Serena starts with 0 property tokens
+- Serena selects Rotterdam Apartment
+- Serena does not enter a bid price
+
+Submit:
+
+```text
+Buy 100 tokens
+```
+
+Expected result:
+
+```text
+Serena bought 100 Rotterdam Apartment tokens at EUR 50 each.
+```
+
+Explain:
+
+```text
+This is a primary offering. Serena buys at the fixed token price, and the backend smart contract simulator settles the purchase automatically.
+```
+
+## 6. Explain The Architecture
 
 Use this simple explanation:
 
 ```text
-The frontend sends Alice's order to the backend. The matching engine checks the order book. When a match is found, the smart contract simulator transfers tokens and updates cash balances automatically.
+The frontend sends Serena's purchase to the backend API. The primary offering service validates the purchase. The smart contract simulator checks that Serena is verified, enough tokens are available, and payment is sufficient. It then updates ownership, cash balances, and funding progress.
 ```
 
 Point to the visible result:
 
-- Alice now owns 12 tokens
-- Bob now owns 88 tokens
-- a trade appears in recent trades
-
-## 6. Show Partial Matching
-
-Optional demo:
-
-Reset the demo, let Bob sell 12 tokens, then let Alice buy 15 tokens.
-
-Expected result:
-
-```text
-The matching engine fills Bob's 12-token sell order and leaves Alice's remaining 3 tokens open.
-```
-
-Explain:
-
-```text
-The engine executes the smaller side of the order. This keeps the secondary market realistic without making the demo complex.
-```
+- Serena now owns 100 tokens
+- Serena owns 1% of the 10,000-token property
+- tokens sold updates to 100 / 10,000
+- Serena's cash balance decreased
+- Alberto's cash balance increased by the investment amount
+- BrickShare's issuance fee was already recorded when Alberto submitted the listing
+- a primary investment appears in investment activity
 
 ## 7. Show Rental Income Distribution
-
-Return to the normal matched-trade state or repeat Bob's 12-token sell order and Alice's 12-token buy order.
 
 Select Admin.
 
@@ -140,33 +165,30 @@ Distribute rent
 Expected result:
 
 ```text
-Rental income distributed: EUR 2,000 was allocated to 2 current token holders.
+Rental income distributed: EUR 2,000 was allocated to current token holders.
 ```
 
 Explain:
 
 ```text
-Rental income follows current token ownership. After the trade, Alice owns 12 tokens and Bob owns 88 tokens.
+Rental income follows current token ownership. If Serena owns more tokens, she receives more rent.
 ```
 
-The property has:
+The formula is:
 
 ```text
-monthly rent pool = 2,000
-total tokens = 1,000
-income per token = 2
+user rent = user tokens / total tokens * monthly rent pool
 ```
 
-So:
+For Serena:
 
 ```text
-Alice receives 24 claimable rent
-Bob receives 176 claimable rent
+100 / 10000 * EUR 2,000 = EUR 20
 ```
 
-## 8. Show Alice Claiming Rent
+## 8. Serena Claims Rent
 
-Select Alice.
+Select Serena.
 
 Click:
 
@@ -177,7 +199,7 @@ Claim rental income
 Expected result:
 
 ```text
-Rental income claimed: EUR 20 was moved into Alice's cash balance.
+EUR 20 moves into Serena's cash balance.
 ```
 
 Explain:
@@ -191,7 +213,7 @@ This demonstrates the smart-contract-style rental payout. Users do not need to u
 Briefly explain:
 
 ```text
-We added focused tests for the three core features: order matching, token transfer, and rental income distribution.
+We added focused tests for the primary offering, token transfer simulation, and rental income distribution.
 ```
 
 Run if needed:
@@ -200,7 +222,7 @@ Run if needed:
 node --test tests/*.test.js
 ```
 
-## 10. Close With Limitations and Next Steps
+## 10. Close With Limitations And Next Steps
 
 State clearly:
 
@@ -215,11 +237,11 @@ Next steps:
 - persistent database
 - KYC/AML checks
 - legal compliance review
-- partial fills and deeper order book
 - payment provider integration
+- future secondary-market trading
 
 Closing line:
 
 ```text
-The MVP proves the core BrickShare idea: tokenized ownership can make real estate investing more accessible, more liquid, and easier to understand for retail investors.
+The MVP proves the core BrickShare idea: fixed-price tokenized ownership can make real estate investing more accessible and easier to understand for retail investors.
 ```

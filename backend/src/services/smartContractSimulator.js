@@ -1,66 +1,61 @@
 // Simulated smart contract layer for BrickShare token ownership.
-// It settles an approved trade by moving property tokens and cash balances.
+// It settles approved token movements by updating ownership and cash balances.
 
 const store = require("../data/store");
 
 const ISSUANCE_FEE_RATE = 0.02;
-const TRADING_COMMISSION_RATE = 0.005;
 const MANAGEMENT_FEE_RATE = 0.01;
 
 function roundMoney(value) {
   return Math.round(value * 100) / 100;
 }
 
-function formatMoney(value) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "EUR",
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
-function validateTransfer({ propertyId, sellerId, buyerId, quantity, price }) {
+function validatePrimaryPurchase({ propertyId, issuerId, investorId, quantity }) {
   const property = store.getPropertyById(propertyId);
-  const seller = store.getUserById(sellerId);
-  const buyer = store.getUserById(buyerId);
-  const sellerHolding = store.getHolding(sellerId, propertyId);
+  const issuer = store.getUserById(issuerId);
+  const investor = store.getUserById(investorId);
+  const issuerHolding = store.getHolding(issuerId, propertyId);
 
   if (!property) {
     return { valid: false, reason: "Property does not exist." };
   }
 
-  if (!seller) {
-    return { valid: false, reason: "Seller does not exist." };
+  if (property.status !== "primary_open") {
+    return { valid: false, reason: "Property must be listed before investors can buy tokens." };
   }
 
-  if (!buyer) {
-    return { valid: false, reason: "Buyer does not exist." };
+  if (!issuer) {
+    return { valid: false, reason: "Property owner does not exist." };
   }
 
-  if (sellerId === buyerId) {
-    return { valid: false, reason: "Buyer and seller must be different users." };
+  if (!investor) {
+    return { valid: false, reason: "Investor does not exist." };
   }
 
-  if (!Number.isFinite(quantity) || quantity <= 0) {
-    return { valid: false, reason: "Token quantity must be greater than zero." };
+  if (!investor.verified) {
+    return { valid: false, reason: "Investor must be verified before buying tokens." };
   }
 
-  if (!Number.isInteger(quantity)) {
-    return { valid: false, reason: "Token quantity must be a whole number." };
+  if (issuerId === investorId) {
+    return { valid: false, reason: "Property owner cannot buy from their own primary offering." };
   }
 
-  if (!Number.isFinite(price) || price <= 0) {
-    return { valid: false, reason: "Token price must be greater than zero." };
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    return { valid: false, reason: "Token quantity must be a positive whole number." };
   }
 
-  if (!sellerHolding || sellerHolding.tokenBalance < quantity) {
-    return { valid: false, reason: "Seller does not have enough tokens." };
+  if (property.availableTokens < quantity) {
+    return { valid: false, reason: "Not enough tokens are available in the primary offering." };
   }
 
-  const tradeValue = roundMoney(quantity * price);
+  if (!issuerHolding || issuerHolding.tokenBalance < quantity) {
+    return { valid: false, reason: "Property owner does not have enough tokens available." };
+  }
 
-  if (buyer.cashBalance < tradeValue) {
-    return { valid: false, reason: "Buyer does not have enough cash." };
+  const investmentValue = roundMoney(quantity * property.tokenPrice);
+
+  if (investor.cashBalance < investmentValue) {
+    return { valid: false, reason: "Investor does not have enough cash for this purchase." };
   }
 
   return { valid: true };
@@ -81,19 +76,12 @@ function getOrCreateHolding(userId, propertyId) {
   });
 }
 
-function transferTokens({
-  propertyId,
-  sellerId,
-  buyerId,
-  quantity,
-  price,
-}) {
-  const validation = validateTransfer({
+function settlePrimaryPurchase({ propertyId, issuerId, investorId, quantity }) {
+  const validation = validatePrimaryPurchase({
     propertyId,
-    sellerId,
-    buyerId,
+    issuerId,
+    investorId,
     quantity,
-    price,
   });
 
   if (!validation.valid) {
@@ -103,49 +91,53 @@ function transferTokens({
     };
   }
 
-  const buyer = store.getUserById(buyerId);
-  const seller = store.getUserById(sellerId);
-  const buyerHolding = getOrCreateHolding(buyerId, propertyId);
-  const sellerHolding = store.getHolding(sellerId, propertyId);
+  const property = store.getPropertyById(propertyId);
+  const issuer = store.getUserById(issuerId);
+  const investor = store.getUserById(investorId);
+  const issuerHolding = store.getHolding(issuerId, propertyId);
+  const investorHolding = getOrCreateHolding(investorId, propertyId);
 
-  const tradeValue = roundMoney(quantity * price);
-  const tradingCommission = roundMoney(tradeValue * TRADING_COMMISSION_RATE);
-  const sellerProceeds = roundMoney(tradeValue - tradingCommission);
+  const investmentValue = roundMoney(quantity * property.tokenPrice);
+  const issuerProceeds = investmentValue;
 
-  buyer.cashBalance = roundMoney(buyer.cashBalance - tradeValue);
-  seller.cashBalance = roundMoney(seller.cashBalance + sellerProceeds);
-  store.addPlatformRevenue("tradingCommissions", tradingCommission);
+  investor.cashBalance = roundMoney(investor.cashBalance - investmentValue);
+  issuer.cashBalance = roundMoney(issuer.cashBalance + issuerProceeds);
 
-  sellerHolding.tokenBalance -= quantity;
-  buyerHolding.tokenBalance += quantity;
+  issuerHolding.tokenBalance -= quantity;
+  investorHolding.tokenBalance += quantity;
+  investorHolding.averagePurchasePrice = property.tokenPrice;
 
-  buyerHolding.averagePurchasePrice = price;
+  store.updateProperty(propertyId, {
+    availableTokens: property.availableTokens - quantity,
+    tokensSold: (property.tokensSold || 0) + quantity,
+    investmentStatus:
+      property.availableTokens - quantity > 0
+        ? "Open for fixed-price primary investment"
+        : "Primary offering sold out",
+    status: property.availableTokens - quantity > 0 ? "primary_open" : "sold_out",
+  });
 
   return {
     success: true,
-    message: `Tokens transferred automatically: ${quantity} tokens moved from seller to buyer and ${formatMoney(
-      sellerProceeds
-    )} was paid to the seller after BrickShare's 0.5% trading commission.`,
     propertyId,
-    sellerId,
-    buyerId,
+    issuerId,
+    investorId,
+    issuerName: issuer.name,
+    investorName: investor.name,
     quantity,
-    price,
-    tradeValue,
-    platformFee: tradingCommission,
-    tradingCommission,
-    sellerProceeds,
-    buyerCashBalance: buyer.cashBalance,
-    sellerCashBalance: seller.cashBalance,
-    buyerTokenBalance: buyerHolding.tokenBalance,
-    sellerTokenBalance: sellerHolding.tokenBalance,
+    price: property.tokenPrice,
+    investmentValue,
+    issuerProceeds,
+    investorCashBalance: investor.cashBalance,
+    issuerCashBalance: issuer.cashBalance,
+    investorTokenBalance: investorHolding.tokenBalance,
+    issuerTokenBalance: issuerHolding.tokenBalance,
   };
 }
 
 module.exports = {
   ISSUANCE_FEE_RATE,
-  TRADING_COMMISSION_RATE,
   MANAGEMENT_FEE_RATE,
-  validateTransfer,
-  transferTokens,
+  validatePrimaryPurchase,
+  settlePrimaryPurchase,
 };

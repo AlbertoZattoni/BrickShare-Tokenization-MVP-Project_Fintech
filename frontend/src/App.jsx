@@ -1,21 +1,25 @@
 // Composes the single BrickShare dashboard and owns frontend state.
 
 import {
+  approveAndTokenize,
+  buyPrimaryTokens,
   claimRentalIncome,
   distributeRentalIncome,
   getDashboard,
-  placeOrder,
+  listProperty,
   resetDemo,
 } from "./api.js";
 import Dashboard from "./components/Dashboard.jsx";
 
 const DEFAULT_USER_ID = "user-alice";
+const ADMIN_USER_ID = "user-admin";
 
 export default function App(root) {
   const state = {
     loading: true,
     data: null,
     selectedUserId: DEFAULT_USER_ID,
+    selectedPropertyId: "property-rotterdam-student-apartments",
     notice: "Loading BrickShare demo data...",
     noticeType: "info",
     error: "",
@@ -36,6 +40,14 @@ export default function App(root) {
       if (!state.data.users.some((user) => user.id === state.selectedUserId)) {
         state.selectedUserId = DEFAULT_USER_ID;
       }
+
+      if (
+        !state.data.properties.some(
+          (property) => property.id === state.selectedPropertyId
+        )
+      ) {
+        state.selectedPropertyId = state.data.properties[0].id;
+      }
     } catch (error) {
       state.error = error.message;
       state.notice = "";
@@ -45,7 +57,7 @@ export default function App(root) {
     }
   }
 
-  async function runAction(action, progressMessage, successMessage) {
+  async function runAction(action, progressMessage, successMessage, afterSuccess) {
     state.error = "";
     state.notice = progressMessage;
     state.noticeType = "info";
@@ -53,6 +65,9 @@ export default function App(root) {
 
     try {
       const result = await action();
+      if (afterSuccess) {
+        afterSuccess(result);
+      }
       await loadDashboard(result.message || successMessage);
     } catch (error) {
       state.error = error.message;
@@ -70,16 +85,37 @@ export default function App(root) {
       state.noticeType = "info";
       render();
     },
-    submitOrder(order) {
-      if (!Number.isInteger(order.quantity) || order.quantity <= 0) {
-        state.error = "Order rejected: quantity must be a positive whole number.";
-        state.notice = "";
-        render();
-        return;
-      }
-
-      if (!Number.isFinite(order.limitPrice) || order.limitPrice <= 0) {
-        state.error = "Order rejected: limit price must be greater than zero.";
+    selectProperty(propertyId) {
+      state.selectedPropertyId = propertyId;
+      const property = state.data.properties.find((item) => item.id === propertyId);
+      state.notice = `${property.name} selected.`;
+      state.noticeType = "info";
+      render();
+    },
+    listSelectedProperty(listing) {
+      runAction(
+        () =>
+          listProperty({
+            ...listing,
+            issuerId: state.selectedUserId,
+          }),
+        "Submitting the property listing for Admin review...",
+        "Property submitted for review.",
+        () => {
+          state.selectedUserId = ADMIN_USER_ID;
+        }
+      );
+    },
+    approveProperty(propertyId) {
+      runAction(
+        () => approveAndTokenize(propertyId, state.selectedUserId),
+        "Admin is approving and tokenizing the property...",
+        "Property approved and tokenized."
+      );
+    },
+    buyTokens(investment) {
+      if (!Number.isInteger(investment.quantity) || investment.quantity <= 0) {
+        state.error = "Purchase rejected: quantity must be a positive whole number.";
         state.notice = "";
         render();
         return;
@@ -87,12 +123,12 @@ export default function App(root) {
 
       runAction(
         () =>
-          placeOrder({
-            ...order,
-            userId: state.selectedUserId,
+          buyPrimaryTokens({
+            ...investment,
+            investorId: state.selectedUserId,
           }),
-        "Submitting order to the matching engine...",
-        "Order submitted."
+        "Buying fixed-price property tokens...",
+        "Tokens purchased."
       );
     },
     distributeRent(propertyId) {
@@ -112,7 +148,7 @@ export default function App(root) {
     reset() {
       runAction(
         () => resetDemo(),
-        "Resetting the demo to the original Alice, Bob, and Admin scenario...",
+        "Resetting the demo to the original Serena, Alberto, and Admin scenario...",
         "Demo reset."
       );
     },
@@ -134,14 +170,44 @@ export default function App(root) {
       orderForm.addEventListener("submit", (event) => {
         event.preventDefault();
         const formData = new FormData(orderForm);
-        actions.submitOrder({
+        actions.buyTokens({
           propertyId: formData.get("propertyId"),
-          type: formData.get("type"),
           quantity: Number(formData.get("quantity")),
-          limitPrice: Number(formData.get("limitPrice")),
         });
       });
     }
+
+    const propertySelect = root.querySelector("[data-property-select]");
+    if (propertySelect) {
+      propertySelect.addEventListener("change", () => {
+        actions.selectProperty(propertySelect.value);
+      });
+    }
+
+    const listingForm = root.querySelector("[data-listing-form]");
+    if (listingForm) {
+      listingForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const formData = new FormData(listingForm);
+        actions.listSelectedProperty({
+          propertyId: formData.get("propertyId"),
+          propertyName: formData.get("propertyName"),
+          propertyValue: Number(formData.get("propertyValue")),
+          fundingTarget: Number(formData.get("fundingTarget")),
+          totalTokens: Number(formData.get("totalTokens")),
+          tokenPrice: Number(formData.get("tokenPrice")),
+          expectedAnnualYieldPercent: Number(
+            formData.get("expectedAnnualYieldPercent")
+          ),
+        });
+      });
+    }
+
+    root.querySelectorAll("[data-approve-property]").forEach((approveButton) => {
+      approveButton.addEventListener("click", () => {
+        actions.approveProperty(approveButton.dataset.propertyId);
+      });
+    });
 
     const distributeButton = root.querySelector("[data-distribute-rent]");
     if (distributeButton) {

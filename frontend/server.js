@@ -27,6 +27,7 @@ function sendFile(res, filePath) {
 
     res.writeHead(200, {
       "Content-Type": contentTypes[path.extname(filePath)] || "text/plain",
+      "Cache-Control": "no-store",
     });
     res.end(content);
   });

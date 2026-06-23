@@ -3,7 +3,7 @@
 const http = require("http");
 const { URL } = require("url");
 const dashboardRoutes = require("./routes/dashboardRoutes");
-const orderRoutes = require("./routes/orderRoutes");
+const primaryOfferingRoutes = require("./routes/primaryOfferingRoutes");
 const rentalRoutes = require("./routes/rentalRoutes");
 
 const PORT = process.env.PORT || 4000;
@@ -12,6 +12,7 @@ const HOST = process.env.HOST || "127.0.0.1";
 function sendJson(res, statusCode, body) {
   res.writeHead(statusCode, {
     "Content-Type": "application/json",
+    "Cache-Control": "no-store",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
@@ -73,8 +74,22 @@ async function handleRequest(req, res) {
       return;
     }
 
-    if (req.method === "POST" && pathname === "/api/orders") {
-      const result = orderRoutes.createOrder(await readJsonBody(req));
+    if (req.method === "POST" && pathname === "/api/properties/list") {
+      const result = primaryOfferingRoutes.listProperty(await readJsonBody(req));
+      sendJson(res, result.statusCode, result.body);
+      return;
+    }
+
+    if (req.method === "POST" && pathname === "/api/properties/approve") {
+      const result = primaryOfferingRoutes.approveAndTokenize(
+        await readJsonBody(req)
+      );
+      sendJson(res, result.statusCode, result.body);
+      return;
+    }
+
+    if (req.method === "POST" && pathname === "/api/investments") {
+      const result = primaryOfferingRoutes.buyTokens(await readJsonBody(req));
       sendJson(res, result.statusCode, result.body);
       return;
     }
