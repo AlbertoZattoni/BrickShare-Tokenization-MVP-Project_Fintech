@@ -44,8 +44,6 @@ The frontend gives users a clear investment dashboard. The backend receives acti
 
 The smart-contract simulation layer represents what a future Solidity smart contract would do. It updates token ownership, cash balances, available token supply, funding progress, and rental income balances. No real blockchain is deployed in this MVP.
 
-More detail is available in [docs/architecture.md](docs/architecture.md).
-
 ## Project Structure
 
 ```text
@@ -55,13 +53,6 @@ tests/                    Focused tests for primary offering, token transfer, an
 docs/                     Architecture and demo notes
 .codex/                   AI-agent instructions for this repository
 ```
-
-## Requirements
-
-- Node.js 18 or newer
-- No npm install is required for the current MVP
-
-The backend and frontend are dependency-free so the project is easy to run in a classroom or demo setting.
 
 ## How to Run
 
@@ -92,22 +83,6 @@ The backend health check is available at:
 ```text
 http://localhost:4000/api/health
 ```
-
-## How to Test
-
-From the repository root:
-
-```bash
-node --test tests/*.test.js
-```
-
-The tests cover:
-
-- property listing submission and Admin tokenization
-- fixed-price primary token purchase
-- smart-contract-style token and cash transfer
-- BrickShare fee revenue
-- proportional rental income distribution
 
 ## Primary-Market Flow
 
@@ -164,8 +139,6 @@ These are simulated platform revenue entries only. The MVP does not process real
 12. Serena claims rental income.
 13. Reset the demo if needed.
 
-More detail is available in [docs/demo-script.md](docs/demo-script.md).
-
 ## MVP Limitations
 
 - No real blockchain or Solidity contract is deployed.
@@ -182,4 +155,13 @@ The MVP was built milestone by milestone with Codex as the coding agent. The wor
 
 ## License
 
-See [LICENSE](LICENSE).
+This project uses the [MIT License](LICENSE).
+
+We chose the MIT License because it is useful for example projects and educational MVPs:
+
+- Almost anyone can use the code for personal or commercial projects.
+- Others can modify and adapt the project.
+- The license is short and simple, with few obligations.
+- It reduces barriers to adoption because companies and contributors are generally comfortable using MIT-licensed code.
+- It can lead to more users, more contributors, and easier integration into open-source or commercial projects.
+- The original authors still retain copyright.
