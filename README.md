@@ -51,7 +51,7 @@ frontend/                 Single dashboard UI
 backend/                  API, demo store, primary offering, token transfer, and rental logic
 tests/                    Focused tests for primary offering, token transfer, and rent logic
 docs/                     Architecture and demo notes
-.codex/                   AI-agent instructions for this repository
+codex-instructions.md     Updated AI-agent instructions for this repository
 ```
 
 ## How to Run
@@ -151,7 +151,7 @@ These are simulated platform revenue entries only. The MVP does not process real
 
 ## AI Tools and Agent Orchestration
 
-The MVP was built milestone by milestone with Codex as the coding agent. The workflow used small commits, explicit architecture decisions, and focused implementation steps. Agent guidance is documented in [.codex/instructions.md](.codex/instructions.md).
+The MVP was built milestone by milestone with Codex as the coding agent. The workflow used small commits, explicit architecture decisions, and focused implementation steps. Agent guidance is documented in [codex-instructions.md](codex-instructions.md).
 
 ## License
 
